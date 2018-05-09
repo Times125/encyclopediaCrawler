@@ -4,7 +4,7 @@
 @Description: 百度百科爬虫
 """
 from scrapy.shell import inspect_response
-from scrapy.spiders import Spider
+from scrapy.spiders import Spider,CrawlSpider
 from scrapy.selector import Selector
 
 from baiduSpider.items import BaiduspiderItem
@@ -20,6 +20,7 @@ class baiduSpider(Spider):
         items = BaiduspiderItem()
         selector = Selector(response)
         items['name'] = selector.xpath("//dd[@class=\"lemmaWgt-lemmaTitle-title\"]/h1/text()[normalize-space()]").extract()[0]
+        items['url'] = response.url
         items['keywords'] = set(selector.xpath(
             "//div[@class=\"main-content\"]//div[@class=\"para\"]//a[@target=\"_blank\"]/text()[normalize-space()]").extract())
         items['description'] = ''.join(
@@ -27,5 +28,4 @@ class baiduSpider(Spider):
                 "//div[@class=\"main-content\"]//div[@class=\"para\"]//text()[normalize-space()]|//div[@class=\"main-content\"]//div[@label-module=\"para-title\"]//h2/text()[normalize-space()]").extract()).replace(
             "\n", "")
         items['embed_image_url'] = selector.xpath("//div[@class=\"para\"]//a[@class=\"image-link\"]//@data-src").extract()
-        print(items['embed_image_url'])
-        print(response.text)
+        print(items['url'])
