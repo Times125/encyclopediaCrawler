@@ -14,7 +14,7 @@ BOT_NAME = 'baiduSpider'
 SPIDER_MODULES = ['baiduSpider.spiders']
 NEWSPIDER_MODULE = 'baiduSpider.spiders'
 
-
+LOG_LEVEL = 'ERROR'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'baiduSpider (+http://www.yourdomain.com)'
 
