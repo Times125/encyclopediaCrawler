@@ -29,4 +29,5 @@ class BaiduspiderPipeline(object):
         #     conn.commit()
         # except Exception as e:
         #     conn.rollback()  # 这里应该把插入失败后的item放到一个失败队列中，等以后再取出来重新爬数据
+        print('pipelines==========>',item)
         return item

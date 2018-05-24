@@ -6,16 +6,18 @@
 from scrapy.shell import inspect_response
 from scrapy.spiders import Spider, CrawlSpider
 from scrapy.selector import Selector
-
+from scrapy.http import Request
 from baiduSpider.items import BaiduspiderItem
 
 
 class baiduSpider(Spider):
     base_url = "https://baike.baidu.com"
+    old_items = []
     name = 'baiduSpider'
     allowed_domains = ['baike.baidu.com']
     start_urls = ['https://baike.baidu.com/item/英国跳猎犬']
 
+# 有些标签可能取值为none，需要做个判断处理
     def parse(self, response):
         items = BaiduspiderItem()
         selector = Selector(response)
@@ -30,5 +32,9 @@ class baiduSpider(Spider):
         items['update_time'] = selector.select("//span[@class = 'j-modified-time']").xpath("string(.)").extract()[0].encode('utf-8')
         items['reference_material'] = selector.select("//dl[@class ='lemma-reference collapse nslog-area log-set-param']").xpath("string(.)").extract()[0].encode('utf-8')
         items['item_tag'] = selector.select("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()[0]
-
-        print(items['item_tag'])
+        print(items['name'].decode('utf-8'), len(items['keywords']))
+        self.old_items = items['keywords']
+        yield items
+        for i in self.old_items:
+            new_url = self.base_url + '/item/' + i
+            yield Request(new_url, callback=self.parse)
