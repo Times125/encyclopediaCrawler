@@ -30,4 +30,5 @@ class baiduSpider(Spider):
         items['update_time'] = selector.select("//span[@class = 'j-modified-time']").xpath("string(.)").extract()[0].encode('utf-8')
         items['reference_material'] = selector.select("//dl[@class ='lemma-reference collapse nslog-area log-set-param']").xpath("string(.)").extract()[0].encode('utf-8')
         items['item_tag'] = selector.select("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()[0]
+
         print(items['item_tag'])
