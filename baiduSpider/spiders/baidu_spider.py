@@ -4,9 +4,8 @@
 @Description: 百度百科爬虫
 """
 from urllib.parse import unquote
-
+from filters.bloom_filter import BloomFilter
 from scrapy import Request
-from scrapy.shell import inspect_response
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
 from baiduSpider.items import BaiduspiderItem
@@ -15,7 +14,6 @@ from scrapy.linkextractors import LinkExtractor
 
 class baiduSpider(CrawlSpider):
     base_url = "https://baike.baidu.com"
-    old_items = []
     name = 'baiduSpider'
     allowed_domains = ['baike.baidu.com']
     start_urls = ['https://baike.baidu.com/item/英国跳猎犬']
@@ -34,13 +32,13 @@ class baiduSpider(CrawlSpider):
         else:
             items['title'] = 'none'
 
-        summary = selector.select("//div[@class=\"lemma-summary\"]").xpath("string(.)").extract()
+        summary = selector.xpath("//div[@class=\"lemma-summary\"]").xpath("string(.)").extract()
         if len(summary) != 0:
             items['summary'] = summary[0]
         else:
             items['summary'] = 'none'
 
-        catalog = selector.select("//div[@class=\"lemmaWgt-lemmaCatalog\"]").xpath("string(.)").extract()
+        catalog = selector.xpath("//div[@class=\"lemmaWgt-lemmaCatalog\"]").xpath("string(.)").extract()
         if len(catalog) != 0:
             items['catalog'] = catalog[0]
         else:
@@ -51,7 +49,7 @@ class baiduSpider(CrawlSpider):
                 selector.xpath("//div[@class=\"para\"]//a[@target=\"_blank\"]/@href").extract()]
         items['keywords_url'] = list(set(filter(lambda x: 'item' in x, urls)))
 
-        description = selector.select("//div[@class=\"content-wrapper\"]").xpath("string(.)").extract()
+        description = selector.xpath("//div[@class=\"content-wrapper\"]").xpath("string(.)").extract()
         if len(description) != 0:
             items['description'] = description[0]
         else:
@@ -69,28 +67,30 @@ class baiduSpider(CrawlSpider):
         else:
             items['album_pic_url'] = 'none'
 
-        update_time = selector.select("//span[@class = 'j-modified-time']").xpath("string(.)").extract()
+        update_time = selector.xpath("//span[@class = 'j-modified-time']").xpath("string(.)").extract()
         if len(update_time) != 0:
             items['update_time'] = update_time[0]
         else:
             items['update_time'] = 'none'
 
-        reference_material = selector.select(
+        reference_material = selector.xpath(
             "//dl[@class ='lemma-reference collapse nslog-area log-set-param']").xpath("string(.)").extract()
         if len(reference_material) != 0:
             items['reference_material'] = reference_material[0]
         else:
             items['reference_material'] = 'none'
 
-        item_tag = selector.select("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()
+        item_tag = selector.xpath("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()
         if len(item_tag) != 0:
             items['item_tag'] = item_tag[0]
         else:
             items['item_tag'] = 'none'
 
         # print(items['keywords_url'])
-        self.old_items = items['keywords_url']
+        # 布隆过滤器过滤已经下载的词条
+        # urls = [u for u in items['keywords_url'] if BloomFilter().is_contain(u) is False]
+        old_urls = items['keywords_url']
         yield items
-        for i in self.old_items:
+        for i in old_urls:
             new_url = self.base_url + i
             yield Request(new_url, callback=self.parse)

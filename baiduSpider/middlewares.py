@@ -5,9 +5,14 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import random
+from urllib.parse import unquote
 
+from scrapy.exceptions import IgnoreRequest
+
+from filters.bloom_filter import BloomFilter
 from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+
 
 class BaiduspiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -24,14 +29,13 @@ class BaiduspiderSpiderMiddleware(object):
     def process_spider_input(self, response, spider):
         # Called for each response that goes through the spider
         # middleware and into the spider.
-
         # Should return None or raise an exception.
+        #   installed downloader middleware will be called
         return None
 
     def process_spider_output(self, response, result, spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
-
         # Must return an iterable of Request, dict or Item objects.
         for i in result:
             yield i
@@ -57,6 +61,7 @@ class BaiduspiderSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
+# 主要是怎么处理异常
 class BaiduspiderDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -79,7 +84,14 @@ class BaiduspiderDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        return None
+        bf = BloomFilter()
+        # 如果此request 已经被请求过，那直接忽略
+        if bf.is_contain(unquote(request.url)):
+            print('IgnoreRequest')
+            raise IgnoreRequest
+        else:
+            print('None')
+            return None
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
@@ -98,7 +110,7 @@ class BaiduspiderDownloaderMiddleware(object):
         # - return None: continue processing this exception
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
-        pass
+        print(exception, unquote(request.url))
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
@@ -120,5 +132,5 @@ class MyUserAgentMiddleware(UserAgentMiddleware):
 
     def process_request(self, request, spider):
         agent = random.choice(self.user_agent)
-        print('===>', agent)
+        # print('===>', agent)
         request.headers['User-Agent'] = agent
