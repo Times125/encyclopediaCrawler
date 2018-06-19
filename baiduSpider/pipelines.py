@@ -6,11 +6,20 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import pymysql.cursors
-import redis
+from db.ItemData import ItemData
+from db.dao import CommandOperate
 
 
 class BaiduspiderPipeline(object):
+
     def process_item(self, item, spider):
+        data = ItemData(title=item['title'], url=item['url'], summary=item['summary'],
+                        catalog=item['catalog'],description=item['description'],
+                        embed_image_url=item['embed_image_url'],album_pic_url=item['album_pic_url'],
+                        reference_material=item['reference_material'],update_time=item['update_time'],
+                        item_tag=['item_tag'])
+        CommandOperate.add_one(data)
+        """
         conn = pymysql.connect(host='127.0.0.1',
                                port=3306,
                                user='root',
@@ -29,4 +38,5 @@ class BaiduspiderPipeline(object):
         except Exception as e:
             conn.rollback()  # 这里应该把插入失败后的item放到一个失败队列中，等以后再取出来重新爬数据
             print('exception:>', e)
+        """
         return item

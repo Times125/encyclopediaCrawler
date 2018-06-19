@@ -8,16 +8,18 @@
 """
 import redis
 from filters import GeneralHashFunctions
-from scrapy.utils.project import get_project_settings
+from baiduSpider.config.conf import get_bloom_args, get_redis_args
 
 
 class BloomFilter:
 
     def __init__(self):
-        self.host = get_project_settings().get('BLOOM_REDIS_HOST')
-        self.port = get_project_settings().get('BLOOM_REDIS_PORT')
-        self.hash_list = get_project_settings().get('BLOOM_HASH_LIST')
-        self.key = get_project_settings().get('BLOOM_REDIS_KEY')
+        bloom_args = get_bloom_args()
+        redis_args = get_redis_args()
+        self.host = redis_args['host']
+        self.port = redis_args['port']
+        self.hash_list = bloom_args['hash_list']
+        self.key = bloom_args['key']
         self.pool = redis.ConnectionPool(host=self.host, port=self.port)
         self.handle = redis.StrictRedis(connection_pool=self.pool, charset='utf-8')
 
@@ -36,11 +38,12 @@ class BloomFilter:
 
 
 if __name__ == '__main__':
-    bf = BloomFilter()
-    f = bf.is_contain('英国跳猎犬')
-    tmps = ['英-国跳猎犬', '美-国跳猎犬','中-国跳猎犬']
-    urls = [u for u in tmps if BloomFilter().is_contain(u) is False]
-    print(urls)
-
-    for i in []:
-        print(i)
+    pass
+    # bf = BloomFilter()
+    # f = bf.is_contain('英国跳猎犬')
+    # tmps = ['英-国跳猎犬', '美-国跳猎犬','中-国跳猎犬']
+    # urls = [u for u in tmps if BloomFilter().is_contain(u) is False]
+    # print(urls)
+    #
+    # for i in []:
+    #     print(i)

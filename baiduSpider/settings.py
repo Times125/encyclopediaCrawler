@@ -58,12 +58,32 @@ MY_USER_AGENT = [
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False  # True
 
+#########################
+# 启用Redis调度存储请求队列
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# 确保所有的爬虫通过Redis去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+
+# 不清除Redis队列、这样可以暂停/恢复 爬取
+SCHEDULER_PERSIST = True
+
+# 使用优先级调度请求队列 （默认使用）
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
+# 可选用的其它队列
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.LifoQueue'
+
+# 最大空闲时间防止分布式爬虫因为等待而关闭
+# 这只有当上面设置的队列类是SpiderQueue或SpiderStack时才有效
+# 并且当您的蜘蛛首次启动时，也可能会阻止同一时间启动（由于队列为空）
+# SCHEDULER_IDLE_BEFORE_CLOSE = 10
+
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
-# See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
-# See also autothrottle settings and docs
 DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -105,6 +125,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'baiduSpider.pipelines.BaiduspiderPipeline': 300,
+    'scrapy_redis.pipelines.RedisPipeline': 400
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -128,10 +149,20 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-# reids中bitmap的key，默认为‘bloom’
-BLOOM_REDIS_KEY = 'baidu'
+DB_TYPE = 'mysql'
+# mysql的连接配置
+MYSQL_HOST = '127.0.0.1'
+MYSQL_PORT = 3306
+MYSQL_USER = 'root'
+MYSQL_PWD = ''
+MYSQL_DB = 'test'
+MYSQL_CHARSET = 'utf8mb4'
+
 # redis的连接配置，默认为本机
-BLOOM_REDIS_HOST = '127.0.0.1'
-BLOOM_REDIS_PORT = 6379
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+
 # 布隆过滤器的哈希列表，默认为8个，定义在GeneralHashFunctions中
 BLOOM_HASH_LIST = ["rs_hash", "js_hash", "pjw_hash", "elf_hash", "bkdr_hash", "sdbm_hash", "djb_hash", "dek_hash"]
+# reids中bitmap的key，默认为‘bloom’
+BLOOM_REDIS_KEY = 'baiduBloom'

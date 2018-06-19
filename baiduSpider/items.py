@@ -6,6 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 from scrapy.item import Field, Item
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import MapCompose, TakeFirst, Join
 
 
 class BaiduspiderItem(Item):
@@ -21,3 +23,10 @@ class BaiduspiderItem(Item):
     update_time = Field()  # 词条更新时间
     reference_material = Field()  # 参考资料
     item_tag = Field()  # 词条标签
+
+
+class BaiduspiderLoader(ItemLoader):
+    default_item_class = BaiduspiderItem
+    default_input_processor = MapCompose(lambda s: s.strip())
+    default_output_processor = TakeFirst()
+    description_out = Join()

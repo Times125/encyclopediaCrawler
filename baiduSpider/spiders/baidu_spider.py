@@ -10,16 +10,23 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
 from baiduSpider.items import BaiduspiderItem
 from scrapy.linkextractors import LinkExtractor
+from scrapy_redis.spiders import RedisCrawlSpider
 
 
 class baiduSpider(CrawlSpider):
     base_url = "https://baike.baidu.com"
     name = 'baiduSpider'
     allowed_domains = ['baike.baidu.com']
-    start_urls = ['https://baike.baidu.com/item/英国跳猎犬']
+    start_urls = ['https://baike.baidu.com/item/猎犬']
+    # redis_key = 'mycrawler:start_urls'
     rules = (
         Rule(LinkExtractor(allow=('https://baike.baidu.com/item/')), callback='parse', follow=True),
     )
+
+    def __init__(self, *args, **kwargs):
+        domain = kwargs.pop('domain', '')
+        self.allowed_domains = filter(None, domain.split(','))
+        super(baiduSpider, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         items = BaiduspiderItem()
