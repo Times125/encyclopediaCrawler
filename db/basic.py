@@ -17,7 +17,7 @@ def get_engine():
                                                                   args['port'], args['database'],
                                                                   args['charset'])
     print(connect_str)
-    egine = create_engine(connect_str, encoding="utf-8", pool_size=100, echo=True)
+    egine = create_engine(connect_str, encoding="utf-8", pool_size=10, echo=True)
     return egine
 
 

@@ -15,8 +15,9 @@ class CommandOperate:
         try:
             db_session.add(data)
             db_session.commit()
-        except InternalError as e:
-            print(data, e)
+        except (InternalError, SqlalchemyIntegrityError, PymysqlIntegrityError, InvalidRequestError) as e:
+            print('=============>', e, "<===============")
+            db_session.rollback()
 
     @classmethod
     def add_all(cls, datas):

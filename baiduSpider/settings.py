@@ -65,11 +65,11 @@ SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 # 确保所有的爬虫通过Redis去重
 DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
-# 不清除Redis队列、这样可以暂停/恢复 爬取
+# # 调度状态持久化,不清除Redis队列、这样可以暂停/恢复 爬取
 SCHEDULER_PERSIST = True
 
 # 使用优先级调度请求队列 （默认使用）
-# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
+SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
 # 可选用的其它队列
 # SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
 # SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.LifoQueue'
@@ -81,12 +81,12 @@ SCHEDULER_PERSIST = True
 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
@@ -125,7 +125,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'baiduSpider.pipelines.BaiduspiderPipeline': 300,
-#    'scrapy_redis.pipelines.RedisPipeline': 400
+    'scrapy_redis.pipelines.RedisPipeline': 310
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

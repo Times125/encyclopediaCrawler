@@ -6,14 +6,13 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import pymysql.cursors
-from db.ItemData import ItemData
+from db.model import ItemData
 from db.dao import CommandOperate
 
 
 class BaiduspiderPipeline(object):
 
     def process_item(self, item, spider):
-        print('item is -->', item['item_tag'])
         data = ItemData(name=item['title'], url=item['url'], summary=item['summary'],
                         catalog=item['catalog'], description=item['description'],
                         embed_image_url=item['embed_image_url'], album_pic_url=item['album_pic_url'],
