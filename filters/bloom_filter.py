@@ -38,9 +38,9 @@ class BloomFilter:
 
 
 if __name__ == '__main__':
-    pass
-    # bf = BloomFilter()
-    # f = bf.is_contain('英国跳猎犬')
+    bf = BloomFilter()
+    f = bf.is_contain('https://baike.baidu.com/item/FACEBOOK2')
+    print(f)
     # tmps = ['英-国跳猎犬', '美-国跳猎犬','中-国跳猎犬']
     # urls = [u for u in tmps if BloomFilter().is_contain(u) is False]
     # print(urls)
