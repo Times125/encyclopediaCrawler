@@ -28,6 +28,7 @@ class baiduSpider(CrawlSpider):
         self.allowed_domains = filter(None, domain.split(','))
         super(baiduSpider, self).__init__(*args, **kwargs)
     """
+
     def parse(self, response):
         items = BaiduspiderItem()
         selector = Selector(response)
@@ -35,19 +36,18 @@ class baiduSpider(CrawlSpider):
 
         title = selector.xpath("/html/head/title/text()").extract()
         if len(title) != 0:
-            items['title'] = title[0]
+            items['title'] = title[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['title'] = 'none'
-
         summary = selector.xpath("//div[@class=\"lemma-summary\"]").xpath("string(.)").extract()
         if len(summary) != 0:
-            items['summary'] = summary[0]
+            items['summary'] = summary[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['summary'] = 'none'
 
         catalog = selector.xpath("//div[@class=\"lemmaWgt-lemmaCatalog\"]").xpath("string(.)").extract()
         if len(catalog) != 0:
-            items['catalog'] = catalog[0]
+            items['catalog'] = catalog[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['catalog'] = 'none'
 
@@ -58,7 +58,7 @@ class baiduSpider(CrawlSpider):
 
         description = selector.xpath("//div[@class=\"content-wrapper\"]").xpath("string(.)").extract()
         if len(description) != 0:
-            items['description'] = description[0]
+            items['description'] = description[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['description'] = 'none'
 
@@ -76,20 +76,20 @@ class baiduSpider(CrawlSpider):
 
         update_time = selector.xpath("//span[@class = 'j-modified-time']").xpath("string(.)").extract()
         if len(update_time) != 0:
-            items['update_time'] = update_time[0]
+            items['update_time'] = update_time[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['update_time'] = 'none'
 
         reference_material = selector.xpath(
             "//dl[@class ='lemma-reference collapse nslog-area log-set-param']").xpath("string(.)").extract()
         if len(reference_material) != 0:
-            items['reference_material'] = reference_material[0]
+            items['reference_material'] = reference_material[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['reference_material'] = 'none'
 
         item_tag = selector.xpath("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()
         if len(item_tag) != 0:
-            items['item_tag'] = item_tag[0]
+            items['item_tag'] = item_tag[0].encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['item_tag'] = 'none'
         # print(items['keywords_url'])
@@ -100,4 +100,3 @@ class baiduSpider(CrawlSpider):
         for i in old_urls:
             new_url = self.base_url + i
             yield Request(new_url, callback=self.parse)
-

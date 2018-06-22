@@ -4,7 +4,7 @@
 @Description: 
 """
 from .basic import db_session
-from sqlalchemy.exc import IntegrityError as SqlalchemyIntegrityError
+from sqlalchemy.exc import IntegrityError as SqlalchemyIntegrityError, InternalError
 from pymysql.err import IntegrityError as PymysqlIntegrityError
 from sqlalchemy.exc import InvalidRequestError
 
@@ -12,8 +12,11 @@ from sqlalchemy.exc import InvalidRequestError
 class CommandOperate:
     @classmethod
     def add_one(cls, data):
-        db_session.add(data)
-        db_session.commit()
+        try:
+            db_session.add(data)
+            db_session.commit()
+        except InternalError as e:
+            print(data, e)
 
     @classmethod
     def add_all(cls, datas):
