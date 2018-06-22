@@ -90,7 +90,6 @@ class BaiduspiderDownloaderMiddleware(object):
             print('IgnoreRequest')
             raise IgnoreRequest
         else:
-            print('None')
             return None
 
     def process_response(self, request, response, spider):

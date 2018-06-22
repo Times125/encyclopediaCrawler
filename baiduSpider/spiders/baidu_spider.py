@@ -22,12 +22,12 @@ class baiduSpider(CrawlSpider):
     rules = (
         Rule(LinkExtractor(allow=('https://baike.baidu.com/item/')), callback='parse', follow=True),
     )
-
+    """
     def __init__(self, *args, **kwargs):
         domain = kwargs.pop('domain', '')
         self.allowed_domains = filter(None, domain.split(','))
         super(baiduSpider, self).__init__(*args, **kwargs)
-
+    """
     def parse(self, response):
         items = BaiduspiderItem()
         selector = Selector(response)
@@ -92,7 +92,6 @@ class baiduSpider(CrawlSpider):
             items['item_tag'] = item_tag[0]
         else:
             items['item_tag'] = 'none'
-
         # print(items['keywords_url'])
         # 布隆过滤器过滤已经下载的词条
         # urls = [u for u in items['keywords_url'] if BloomFilter().is_contain(u) is False]
@@ -101,3 +100,4 @@ class baiduSpider(CrawlSpider):
         for i in old_urls:
             new_url = self.base_url + i
             yield Request(new_url, callback=self.parse)
+

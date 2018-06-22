@@ -125,7 +125,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'baiduSpider.pipelines.BaiduspiderPipeline': 300,
-    'scrapy_redis.pipelines.RedisPipeline': 400
+#    'scrapy_redis.pipelines.RedisPipeline': 400
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -13,11 +13,12 @@ from db.dao import CommandOperate
 class BaiduspiderPipeline(object):
 
     def process_item(self, item, spider):
-        data = ItemData(title=item['title'], url=item['url'], summary=item['summary'],
-                        catalog=item['catalog'],description=item['description'],
-                        embed_image_url=item['embed_image_url'],album_pic_url=item['album_pic_url'],
-                        reference_material=item['reference_material'],update_time=item['update_time'],
-                        item_tag=['item_tag'])
+        print('item is -->', item['item_tag'])
+        data = ItemData(name=item['title'], url=item['url'], summary=item['summary'],
+                        catalog=item['catalog'], description=item['description'],
+                        embed_image_url=item['embed_image_url'], album_pic_url=item['album_pic_url'],
+                        reference_material=item['reference_material'], update_time=item['update_time'],
+                        item_tag=item['item_tag'])
         CommandOperate.add_one(data)
         """
         conn = pymysql.connect(host='127.0.0.1',
