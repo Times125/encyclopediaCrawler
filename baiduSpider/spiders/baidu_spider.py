@@ -17,7 +17,7 @@ class baiduSpider(CrawlSpider):
     base_url = "https://baike.baidu.com"
     name = 'baiduSpider'
     allowed_domains = ['baike.baidu.com']
-    start_urls = ['https://baike.baidu.com/item/猎犬']
+    start_urls = ['https://baike.baidu.com/item/操作系统']
     # redis_key = 'mycrawler:start_urls'
     rules = (
         Rule(LinkExtractor(allow=('https://baike.baidu.com/item/')), callback='parse', follow=True),
