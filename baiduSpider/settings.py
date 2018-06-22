@@ -165,4 +165,4 @@ REDIS_PORT = 6379
 # 布隆过滤器的哈希列表，默认为8个，定义在GeneralHashFunctions中
 BLOOM_HASH_LIST = ["rs_hash", "js_hash", "pjw_hash", "elf_hash", "bkdr_hash", "sdbm_hash", "djb_hash", "dek_hash"]
 # reids中bitmap的key，默认为‘bloom’
-BLOOM_REDIS_KEY = 'baiduBloom'
+BLOOM_REDIS_KEY = 'baiduSpider:BloomFilter'
