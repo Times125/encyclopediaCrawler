@@ -19,6 +19,8 @@ try:
 except ImportError:
     from io import BytesIO
 
+handle = get_redis_conn()
+
 
 class BaiduspiderPipeline(object):
     """ 百度百科 """
@@ -39,7 +41,6 @@ class BaiduspiderPipeline(object):
 # request queue
 class BaiduSpiderRedisPipeline(object):
     """use bloomfilter to filter the request which had been sent"""
-    handle = get_redis_conn()
     base_url = "https://baike.baidu.com"
     bf = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIDU_BLOOM_KEY)
 
@@ -51,18 +52,17 @@ class BaiduSpiderRedisPipeline(object):
                 continue
             else:
                 new_url = self.base_url + url
-                self.handle.lpush(BAIDU_ITEM_URLS, new_url)
+                handle.lpush(BAIDU_ITEM_URLS, new_url)
         return item
 
 
 # resources queue
-# 新的解决方法：将每个词条的资源连接push到一个专门的下载队列中，然后单独使用下载器来下载任务，松耦合
-class BaiduSpiderCachePipeline(object):
+# 新的解决方法：将每个词条的资源连接push到一个专门的下载队列中，然后单独使用下载器来下载任务，低耦合
+class WebCachePipeline(object):
     """ push the resource urls into task queue """
-    handle = get_redis_conn()
 
     def process_item(self, item, spider):
-        bloomKey = "{}:{}".format(spider.name, "CacheCSSandJSFilter")
+        bloomKey = "{}:{}".format("bloomfilter", "CacheCSSandJSFilter")
         js_urls = []
         css_urls = []
         bf = BloomFilterRedis(block=1, key=bloomKey)
@@ -77,10 +77,11 @@ class BaiduSpiderCachePipeline(object):
                 continue
             else:
                 css_urls.append(url)
-        key = "{}:{}".format(spider.name, "cache_task_queue")
+        key = "{}:{}".format("resources", "cache_task_queue")
         value = dict(title=item['title'], from2=spider.name, htm=item['html'], js=js_urls, css=css_urls,
                      pic=item['embed_image_url'])
-        self.handle.lpush(key, value)
+        handle.lpush(key, value)
+        print('from:', spider.name)
         return item
         """
         if not os.path.exists('{}\css_resources'.format(BAIDU_HTML_CACHE)):

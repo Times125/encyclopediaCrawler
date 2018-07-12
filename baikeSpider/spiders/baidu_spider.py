@@ -28,7 +28,7 @@ class baiduSpider(RedisCrawlSpider):
         'ITEM_PIPELINES': {
             'baikeSpider.pipelines.BaiduspiderPipeline': 300,
             'baikeSpider.pipelines.BaiduSpiderRedisPipeline': 301,
-            'baikeSpider.pipelines.BaiduSpiderCachePipeline': 302,
+            'baikeSpider.pipelines.WebCachePipeline': 302,
         },
     }
 
@@ -70,10 +70,9 @@ class baiduSpider(RedisCrawlSpider):
             items['description'] = ''
 
         # 匹配pic、js、css
-        ct = CacheTool(items['html'])
-        items['embed_image_url'] = ct.parse_img()
-        items['js'] = ct.parse_js()
-        items['css'] = ct.parse_css()
+        items['embed_image_url'] = CacheTool.parse_img(items['html'])
+        items['js'] = CacheTool.parse_js(items['html'])
+        items['css'] = CacheTool.parse_css(items['html'])
 
         album_pic_url = selector.xpath("//div[@class=\"album-list\"]//a[@class=\"more-link\"]/@href").extract()
         if album_pic_url:

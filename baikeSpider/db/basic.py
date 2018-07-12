@@ -35,7 +35,6 @@ def get_engine():
         return egine
     except OperationalError as e:
         logger.error(e)
-        print(e)
 
 
 engine = get_engine()

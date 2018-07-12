@@ -18,32 +18,25 @@ class FileException(Exception):
 
 
 class CacheTool(object):
-    """
-    :param html: the response text
-    :param path: the cache save path
-    :param name: the lemma name
-    """
 
-    def __init__(self, html, path=None, name=None):
-        self.html = html
-        self.path = path
-        self.name = name
-
-    def parse_css(self):
+    @classmethod
+    def parse_css(cls, html):
         css_url = re.compile(r'href="(http[s]*.+?\.css)"')
-        list_css = re.findall(css_url, self.html)
+        list_css = re.findall(css_url, html)
         list_css = list(set(list_css))
         return list_css
 
-    def parse_img(self):
+    @classmethod
+    def parse_img(cls, html):
         img_url = re.compile(r'src="(http[s]*.+?\.[jpg]*[png]*[gif]*)"')
-        list_img = re.findall(img_url, self.html)
+        list_img = re.findall(img_url, html)
         list_img = list(set(list_img))
         return list_img
 
-    def parse_js(self):
+    @classmethod
+    def parse_js(cls, html):
         js_url = re.compile(r'src="(http[s]*.+?\.js)"')
-        list_js = re.findall(js_url, self.html)
+        list_js = re.findall(js_url, html)
         list_js = list(set(list_js))
         return list_js
 

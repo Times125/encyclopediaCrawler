@@ -103,12 +103,12 @@ REDIS_PORT = 6379
 SPIDER_FEED_SIZE = 32
 
 # 爬虫要抓取的任务队列
-BAIDU_ITEM_URLS = 'baiduSpider:task_queue'
-BAIKE_ITEM_URLS = 'baikeSpider:task_queue'
+BAIDU_ITEM_URLS = 'task_queue:baiduSpider'
+BAIKE_ITEM_URLS = 'task_queue:baikeSpider'
 
-# 爬虫布隆过滤器
-BAIDU_BLOOM_KEY = 'baiduSpider:bloomfilter'
-BAIKE_BLOOM_KEY = 'baikeSpider:bloomfilter'
+# 爬虫已爬词条布隆过滤器
+BAIDU_BLOOM_KEY = 'bloomfilter:baiduSpider'
+BAIKE_BLOOM_KEY = 'bloomfilter:baikeSpider'
 
 # 布隆过滤器block数量
 FILTER_BLOCKS = 1
@@ -117,7 +117,14 @@ FILTER_BLOCKS = 1
 BAIDU_HTML_CACHE = 'E:\Repositories\\baiduSpider\BaiduCache'
 BAIKE_HTML_CACHE = ''
 
+# 指定web资源缓存延时(s)
+WEB_CACHE_DELAY = 1.5
+
+# 指定web资源缓存并发数,这个参数和前面的页面下载延时（DOWNLOAD_DELAY）线性相关，
+# （DOWNLOAD_DELAY）越短以及（WEB_CACHE_DELAY）越长，缓存并发数则可以稍微设置大一些，
+WEB_CACHE_FEED_SIZE = 3
+
+
 # 日志缓存目录
 LOG_PATH = 'E:\Repositories\\baiduSpider'
-# 90 days of delay for files expiration
-# FILES_EXPIRES = 0
+
