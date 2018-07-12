@@ -9,10 +9,10 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'baiduSpider'
+BOT_NAME = 'baikeSpider'
 
-SPIDER_MODULES = ['baiduSpider.spiders']
-NEWSPIDER_MODULE = 'baiduSpider.spiders'
+SPIDER_MODULES = ['baikeSpider.spiders']
+NEWSPIDER_MODULE = 'baikeSpider.spiders'
 FEED_EXPORT_ENCODING = 'utf-8'  # 中文转码
 LOG_LEVEL = 'ERROR'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -58,96 +58,35 @@ MY_USER_AGENT = [
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False  # True
 
-#########################
-# 启用Redis调度存储请求队列
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-
-# 确保所有的爬虫通过Redis去重
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-
-# # 调度状态持久化,不清除Redis队列、这样可以暂停/恢复 爬取
-SCHEDULER_PERSIST = True
-
-# 使用优先级调度请求队列 （默认使用）
-SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
-# 可选用的其它队列
-# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
-# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.LifoQueue'
-
-# 最大空闲时间防止分布式爬虫因为等待而关闭
-# 这只有当上面设置的队列类是SpiderQueue或SpiderStack时才有效
-# 并且当您的蜘蛛首次启动时，也可能会阻止同一时间启动（由于队列为空）
-# SCHEDULER_IDLE_BEFORE_CLOSE = 10
-
-
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 0.25
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 32
 # CONCURRENT_REQUESTS_PER_IP = 16
+
+# DUPEFILTER_CLASS = 'baikeSpider.dupefilters.RFPDupeFilter'
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
+# 重试
+RETRY_ENABLED = True
+RETRY_TIMES = 3
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
 
-# Disable Telnet Console (enabled by default)
-# TELNETCONSOLE_ENABLED = False
-
-# Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-# }
-
-# Enable or disable spider middlewares
-# See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-# SPIDER_MIDDLEWARES = {
-#    'baiduSpider.middlewares.BaiduspiderSpiderMiddleware': 543,
-# }
+DEPTH_PRIORITY = 1
+SCHEDULER_DISK_QUEUE = 'scrapy.squeue.PickleFifoDiskQueue'
+SCHEDULER_MEMORY_QUEUE = 'scrapy.squeue.FifoMemoryQueue'
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'baiduSpider.middlewares.BaiduspiderDownloaderMiddleware': 543,
     'scrapy.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'baiduSpider.middlewares.MyUserAgentMiddleware': 400,
+    'baikeSpider.middlewares.MyUserAgentMiddleware': 400,
+    'baikeSpider.middlewares.MyRetryMiddleware': 501
 }
-
-# Enable or disable extensions
-# See https://doc.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
-
-# Configure item pipelines
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'baiduSpider.pipelines.BaiduspiderPipeline': 300,
-    'scrapy_redis.pipelines.RedisPipeline': 310
-}
-
-# Enable and configure the AutoThrottle extension (disabled by default)
-# See https://doc.scrapy.org/en/latest/topics/autothrottle.html
-# AUTOTHROTTLE_ENABLED = True
-# The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
-# The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 60
-# The average number of requests Scrapy should be sending in parallel to
-# each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
-# Enable showing throttling stats for every response received:
-# AUTOTHROTTLE_DEBUG = False
-
-# Enable and configure HTTP caching (disabled by default)
-# See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-# HTTPCACHE_ENABLED = True
-# HTTPCACHE_EXPIRATION_SECS = 0
-# HTTPCACHE_DIR = 'httpcache'
-# HTTPCACHE_IGNORE_HTTP_CODES = []
-# HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 DB_TYPE = 'mysql'
 # mysql的连接配置
@@ -161,8 +100,24 @@ MYSQL_CHARSET = 'utf8mb4'
 # redis的连接配置，默认为本机
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
+SPIDER_FEED_SIZE = 32
 
-# 布隆过滤器的哈希列表，默认为8个，定义在GeneralHashFunctions中
-BLOOM_HASH_LIST = ["rs_hash", "js_hash", "pjw_hash", "elf_hash", "bkdr_hash", "sdbm_hash", "djb_hash", "dek_hash"]
-# reids中bitmap的key，默认为‘bloom’
-BLOOM_REDIS_KEY = 'baiduSpider:BloomFilter'
+# 爬虫要抓取的任务队列
+BAIDU_ITEM_URLS = 'baiduSpider:task_queue'
+BAIKE_ITEM_URLS = 'baikeSpider:task_queue'
+
+# 爬虫布隆过滤器
+BAIDU_BLOOM_KEY = 'baiduSpider:bloomfilter'
+BAIKE_BLOOM_KEY = 'baikeSpider:bloomfilter'
+
+# 布隆过滤器block数量
+FILTER_BLOCKS = 1
+
+# 指定各网站网页离线缓存路径
+BAIDU_HTML_CACHE = 'E:\Repositories\\baiduSpider\BaiduCache'
+BAIKE_HTML_CACHE = ''
+
+# 日志缓存目录
+LOG_PATH = 'E:\Repositories\\baiduSpider'
+# 90 days of delay for files expiration
+# FILES_EXPIRES = 0

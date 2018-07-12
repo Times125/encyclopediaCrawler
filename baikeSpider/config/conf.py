@@ -26,10 +26,3 @@ def get_redis_args():
     redis_args['port'] = get_project_settings().get('REDIS_PORT')
     return redis_args
 
-
-# bloom filter config
-def get_bloom_args():
-    bloom_args = dict()
-    bloom_args['hash_list'] = get_project_settings().get('BLOOM_HASH_LIST')
-    bloom_args['key'] = get_project_settings().get('BLOOM_REDIS_KEY')
-    return bloom_args

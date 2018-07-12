@@ -1,24 +1,3 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#
-# **************************************************************************
-# *                                                                        *
-# *          General Purpose Hash Function Algorithms Library              *
-# *                                                                        *
-# * Author: Arash Partow - 2002                                            *
-# * URL: http://www.partow.net                                             *
-# * URL: http://www.partow.net/programming/hashfunctions/index.html        *
-# *                                                                        *
-# * Copyright notice:                                                      *
-# * Free use of the General Purpose Hash Function Algorithms Library is    *
-# * permitted under the guidelines and in accordance with the MIT License. *
-# * http://www.opensource.org/licenses/MIT                                 *
-# *                                                                        *
-# **************************************************************************
-#
-
-
 def rs_hash(key):
     a = 378551
     b = 63689
@@ -86,7 +65,7 @@ def djb_hash(key):
 
 
 def dek_hash(key):
-    hash_value = len(key);
+    hash_value = len(key)
     for i in range(len(key)):
         hash_value = ((hash_value << 5) ^ (hash_value >> 27)) ^ ord(key[i])
     return hash_value
