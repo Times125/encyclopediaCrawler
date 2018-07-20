@@ -96,8 +96,7 @@ class GoogleTranslate(object):
             n += 1
         for i in range(1, n + 1):
             splitContent = content[5000 * (i - 1):5000 * i]
-            print("第%s次分割后的结果,此次长度为%s" % (i, len(splitContent)))
-            print("===>", splitContent)
+            # print("第%s次分割后的结果,此次长度为%s" % (i, len(splitContent)))
             tk = self.js.getTk(splitContent)
             splitContent = urllib.parse.quote(splitContent)
             headers = {'User-Agent': self.randomAgent()}
@@ -110,7 +109,7 @@ class GoogleTranslate(object):
         result = ""
         for res in res_list:
             result += self.parse_json(res)
-        print(result)
+        # print(result)
         return result
 
     @staticmethod
