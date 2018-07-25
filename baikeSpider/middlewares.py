@@ -26,7 +26,7 @@ class MyUserAgentMiddleware(UserAgentMiddleware):
         )
 
     def process_request(self, request, spider):
-        agent = random.choice(self.user_agent)
+        agent = random.sample(self.user_agent, 1)[0]
         # print('===>', agent)
         request.headers['User-Agent'] = agent
 
@@ -40,7 +40,9 @@ class MyRetryMiddleware(RetryMiddleware):
             return response
         if response.status in self.retry_http_codes:
             reason = response_status_message(response.status)
-
+            key = "{}:{}".format(spider.name, 'task_failed_queue')
+            value = request.url
+            self.handle.lpush(key, value)
             return self._retry(request, reason, spider) or response
         return response
 

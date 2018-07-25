@@ -9,9 +9,9 @@ import os
 from .db.model import BaiduItemData, BaikeItemData
 from .db.dao import CommandOperate
 from .db.basic import get_redis_conn
-from .settings import BAIDU_ITEM_URLS, BAIKE_ITEM_URLS, BAIDU_HTML_CACHE
 from .bloomfilter.filter import BloomFilterRedis
-from .settings import FILTER_BLOCKS, BAIDU_BLOOM_KEY, BAIKE_BLOOM_KEY
+from .settings import (FILTER_BLOCKS, BAIDU_BLOOM_KEY, BAIKE_BLOOM_KEY, BAIDU_ITEM_URLS, BAIKE_ITEM_URLS,
+                       BAIDU_SPIDER_NAME, BAIKE_SPIDER_NAME)
 from .utils.log import logger
 
 try:
@@ -22,37 +22,64 @@ except ImportError:
 handle = get_redis_conn()
 
 
-class BaiduspiderPipeline(object):
-    """ 百度百科 """
+class SpiderPipeline(object):
+    """ 百度、互动百科 """
 
     def process_item(self, item, spider):
-        try:
-            data = BaiduItemData(name=item['title'], url=item['url'], summary=item['summary'],
-                                 catalog=item['catalog'], description=item['description'],
-                                 embed_image_url=','.join(item['embed_image_url']), album_pic_url=item['album_pic_url'],
-                                 reference_material=item['reference_material'], update_time=item['update_time'],
-                                 item_tag=item['item_tag'])
-            CommandOperate.add_one(data)
-            return item
-        except Exception as e:
-            logger.error(e)
+        if spider.name == BAIDU_SPIDER_NAME:
+            try:
+                data = BaiduItemData(name=item['title'], url=item['url'], summary=item['summary'],
+                                     basic_info=item['basic_info'],
+                                     catalog=item['catalog'], description=item['description'],
+                                     embed_image_url=','.join(item['embed_image_url']),
+                                     album_pic_url=item['album_pic_url'],
+                                     reference_material=item['reference_material'], update_time=item['update_time'],
+                                     item_tag=item['item_tag'])
+                CommandOperate.add_one(data)
+
+            except Exception as e:
+                logger.error(e)
+        elif spider.name == BAIKE_SPIDER_NAME:
+            try:
+                data = BaikeItemData(name=item['title'], url=item['url'], summary=item['summary'],
+                                     basic_info=item['basic_info'],
+                                     catalog=item['catalog'], description=item['description'],
+                                     embed_image_url=','.join(item['embed_image_url']),
+                                     album_pic_url=item['album_pic_url'],
+                                     reference_material=item['reference_material'], update_time=item['update_time'],
+                                     item_tag=item['item_tag'])
+                CommandOperate.add_one(data)
+            except Exception as e:
+                logger.error(e)
+        return item
 
 
 # request queue
-class BaiduSpiderRedisPipeline(object):
-    """use bloomfilter to filter the request which had been sent"""
+class SpiderRedisPipeline(object):
+    """ use bloomfilter to filter the request which had been sent """
+    # 百度百科
     base_url = "https://baike.baidu.com"
     bf = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIDU_BLOOM_KEY)
+    # 互动百科
+    bf2 = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIKE_BLOOM_KEY)
 
     def process_item(self, item, spider):
         if not item['keywords_url']:
             return item
-        for url in item['keywords_url']:
-            if self.bf.is_exists(url):
-                continue
-            else:
-                new_url = self.base_url + url
-                handle.lpush(BAIDU_ITEM_URLS, new_url)
+        if spider.name == BAIDU_SPIDER_NAME:
+            for url in item['keywords_url']:
+                if self.bf.is_exists(url):
+                    continue
+                else:
+                    new_url = self.base_url + url
+                    handle.lpush(BAIDU_ITEM_URLS, new_url)
+        elif spider.name == BAIKE_SPIDER_NAME:
+            for url in item['keywords_url']:
+                if self.bf2.is_exists(url):
+                    continue
+                else:
+                    new_url = url
+                    handle.lpush(BAIKE_ITEM_URLS, new_url)
         return item
 
 
@@ -82,58 +109,4 @@ class WebCachePipeline(object):
                      pic=item['embed_image_url'])
         handle.lpush(key, value)
         print('from:', spider.name)
-        return item
-        """
-        if not os.path.exists('{}\css_resources'.format(BAIDU_HTML_CACHE)):
-            os.makedirs('{}\css_resources'.format(BAIDU_HTML_CACHE))
-        if not os.path.exists('{}\js_resources'.format(BAIDU_HTML_CACHE)):
-            os.makedirs('{}\js_resources'.format(BAIDU_HTML_CACHE))
-        for url in js_urls:
-            if bf.is_exists(url):
-                continue
-            path = url.split('/')[-1]
-            js_filename = '{}\js_resources\{}'.format(BAIDU_HTML_CACHE, path)
-            print(js_filename)
-            response = self.get_response(url, spider, item['title'])
-            with open(js_filename, 'w+', encoding='utf8') as w:
-                w.write(bytes2str(response.data))
-        for url in css_urls:
-
-            if bf.is_exists(url):
-                continue
-            path = url.split('/')[-1]
-            print(url)
-            css_filename = '{}\css_resources\{}'.format(BAIDU_HTML_CACHE, path)
-            response = self.get_response(url, spider, item['title'])
-            with open(css_filename, 'w+', encoding='utf8') as w:
-                w.write(bytes2str(response.data))
-        """
-
-
-class BaikespiderPipeline(object):
-    """" 互动百科 """
-
-    def process_item(self, item, spider):
-        data = BaikeItemData(name=item['title'], url=item['url'], summary=item['summary'],
-                             catalog=item['catalog'], description=item['description'],
-                             embed_image_url=item['embed_image_url'], album_pic_url=item['album_pic_url'],
-                             reference_material=item['reference_material'], update_time=item['update_time'],
-                             item_tag=item['item_tag'])
-        CommandOperate.add_one(data)
-        return item
-
-
-class BaikeSpiderRedisPipeline(object):
-    """use bloomfilter to filter the request which had been sent"""
-    handle = get_redis_conn()
-    base_url = "https://www.baike.com"
-    bf = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIKE_BLOOM_KEY)
-
-    def process_item(self, item, spider):
-        for url in item['keywords_url']:
-            if self.bf.is_exists(url):
-                continue
-            else:
-                new_url = self.base_url + url
-                self.handle.lpush(BAIKE_ITEM_URLS, new_url)
         return item

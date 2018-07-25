@@ -11,31 +11,31 @@ from scrapy.selector import Selector
 from baikeSpider.items import BaiduspiderItem
 from scrapy.linkextractors import LinkExtractor
 from .redis_spider import RedisCrawlSpider
-from ..settings import BAIDU_ITEM_URLS
+from ..settings import BAIDU_ITEM_URLS, BAIDU_SPIDER_NAME
 from ..cache.html_cache import CacheTool
 
 
 class baiduSpider(RedisCrawlSpider):
     task_queue = BAIDU_ITEM_URLS
     base_url = "https://baike.baidu.com"
-    name = 'baiduSpider'
+    name = BAIDU_SPIDER_NAME
     allowed_domains = ['baike.baidu.com']
     rules = (
-        Rule(LinkExtractor(allow=('https://baike.baidu.com/item/')), callback='parse', follow=True),
+        Rule(LinkExtractor(allow=('https://baike.baidu.com/item/',)), callback='parse', follow=True),
     )
-    custom_settings = {
-        'FILES_STORE': 'E:\Repositories\\baiduSpider\BaiduCache',
-        'ITEM_PIPELINES': {
-            'baikeSpider.pipelines.BaiduspiderPipeline': 300,
-            'baikeSpider.pipelines.BaiduSpiderRedisPipeline': 301,
-            'baikeSpider.pipelines.WebCachePipeline': 302,
-        },
-    }
+
+    # custom_settings = {
+    #     'ITEM_PIPELINES': {
+    #         'baikeSpider.pipelines.SpiderPipeline': 300,
+    #         'baikeSpider.pipelines.SpiderRedisPipeline': 301,
+    #         'baikeSpider.pipelines.WebCachePipeline': 302,
+    #     },
+    # }
 
     def parse(self, response):
         items = BaiduspiderItem()
         selector = Selector(response)
-        print(response.status, response)
+        # print(response.status, response)
         items['url'] = unquote(response.url)
         items['html'] = response.text
         title = selector.xpath("/html/head/title/text()").extract()
@@ -49,6 +49,13 @@ class baiduSpider(RedisCrawlSpider):
             items['summary'] = re.sub('\r\n|\n|\r', ' ', tmps)
         else:
             items['summary'] = ''
+
+        basic_info = selector.xpath("//div[@class=\"basic-info cmn-clearfix\"]").xpath("string(.)").extract()
+        if basic_info:
+            tmpb = basic_info[0].encode('utf-8', errors='ignore').decode('utf-8')
+            items['basic_info'] = re.sub('\r\n|\n|\r', ' ', tmpb)
+        else:
+            items['basic_info'] = ''
 
         catalog = selector.xpath("//div[@class=\"lemmaWgt-lemmaCatalog\"]").xpath("string(.)").extract()
         if catalog:

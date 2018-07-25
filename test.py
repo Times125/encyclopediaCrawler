@@ -16,13 +16,14 @@ from baikeSpider.utils.utils import bytes2str
 from baikeSpider.utils.utils import strips
 from baikeSpider.db.basic import get_redis_conn
 from baikeSpider.bloomfilter.filter import BloomFilterRedis
-from baikeSpider.settings import FILTER_BLOCKS, BAIDU_BLOOM_KEY, BAIDU_HTML_CACHE,WEB_CACHE_DELAY,WEB_CACHE_FEED_SIZE
+from baikeSpider.settings import FILTER_BLOCKS, BAIDU_BLOOM_KEY, BAIDU_HTML_CACHE, WEB_CACHE_DELAY, WEB_CACHE_FEED_SIZE
 from baikeSpider.cache.html_cache import CacheTool
 from baikeSpider.utils.log import *
 import time
 import asyncio
+import aiofiles
 from aiohttp import ClientSession
-
+from WebDownloader.base import baseDownloader
 
 class A(object):
     def a(self, m):
@@ -47,9 +48,9 @@ async def download_js(url, sem):
             async with session.get(url) as response:
                 res = await response.read()
                 path = url.split('/')[-1]
-                js_filename = '{}/{}'.format("E:\Repositories\\baiduSpider\BaiduCache\js_resources", path)
-                with open(js_filename, 'w+', encoding='utf8') as writter:
-                    writter.write(bytes2str(res))
+                js_filename = '{}\\{}'.format("E:\Repositories\\baiduSpider\BaiduCache\js_resources", path)
+                async with aiofiles.open(js_filename, 'w+', encoding='utf8') as writter:
+                    await writter.write(bytes2str(res))
                 return res
 
 
@@ -60,9 +61,9 @@ async def download_css(url, sem):
                 res = await response.read()
                 # print(res)
                 path = url.split('/')[-1]
-                css_filename = '{}/{}'.format("E:\Repositories\\baiduSpider\BaiduCache\css_resources", path)
-                with open(css_filename, 'w+', encoding='utf8') as writter:
-                    writter.write(bytes2str(res))
+                css_filename = '{}\\{}'.format("E:\Repositories\\baiduSpider\BaiduCache\css_resources", path)
+                async with aiofiles.open(css_filename, 'w+', encoding='utf8') as writter:
+                    await writter.write(bytes2str(res))
                 return res
 
 
@@ -77,8 +78,11 @@ async def download_pic(url, sem, title):
                 if not os.path.exists(folder):
                     os.makedirs(folder)
                 pic_filename = '{}/{}'.format(folder, path)
-                with open(pic_filename, 'wb') as writter:
-                    writter.write(res)
+                async with aiofiles.open(pic_filename, 'wb') as writter:
+                    await writter.write(res)
+
+                # with open(pic_filename, 'wb') as writter:
+                #     writter.write(res)
                 return res
 
 
@@ -103,10 +107,6 @@ def test_eval():
     tr_v = eval(res)
     return tr_v
     # print(type(tr_v), "===>", tr_v, bytes2str(tr_v['htm']))
-
-
-urls = ['https://baike.baidu.com/item/旧唱片', 'https://baike.baidu.com/item/梅艳芳', 'https://baike.baidu.com/item/刑宪',
-        'https://baike.baidu.com/item/史才', 'https://baike.baidu.com/item/行游天下', 'https://baike.baidu.com/item/罚不当罪']
 
 
 def make_request_from_data(data):
@@ -138,16 +138,18 @@ def make_request_from_data(data):
     #     tasks.append(task)
     tasks = [asyncio.ensure_future(download_pic(i, sem, title)) for i in pic]
     pic_res = loop.run_until_complete(asyncio.gather(*tasks))
-
+    # loop.close()
 
     return js_res, css_res, pic_res
 
 
 if __name__ == "__main__":
+
     # path = 'test.css'
     # css_filename = '{}/{}'.format("E:\Repositories\\baiduSpider\BaiduCache\css_resources", path)
     # with open(css_filename, 'w+', encoding='utf8') as writter:
     #     writter.write(bytes2str('hello'))
+
     redis_batch_size = WEB_CACHE_FEED_SIZE
     task_queue = "resources:cache_task_queue"
     fetch_one = get_redis_conn().lpop

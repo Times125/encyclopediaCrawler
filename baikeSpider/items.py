@@ -13,6 +13,7 @@ class BaiduspiderItem(Item):
     title = Field()  # 此词条名称
     url = Field()  # 词条url
     summary = Field()  # 词条简介
+    basic_info = Field()  # 词条基本信息
     catalog = Field()  # 词条目录
     description = Field()  # 词条内容
     keywords = Field()  # 此词条内容所包含的其他词条
@@ -32,6 +33,7 @@ class BaikespiderItem(Item):
     title = Field()  # 此词条名称
     url = Field()  # 词条url
     summary = Field()  # 词条简介
+    basic_info = Field()  # 词条基本信息
     catalog = Field()  # 词条目录
     description = Field()  # 词条内容
     keywords = Field()  # 此词条内容所包含的其他词条
@@ -41,3 +43,6 @@ class BaikespiderItem(Item):
     update_time = Field()  # 词条更新时间
     reference_material = Field()  # 参考资料
     item_tag = Field()  # 词条标签
+    html = Field()  # 网页源码
+    js = Field()  # 网页js
+    css = Field()  # 网页css样式

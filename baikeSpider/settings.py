@@ -17,7 +17,8 @@ FEED_EXPORT_ENCODING = 'utf-8'  # 中文转码
 LOG_LEVEL = 'ERROR'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'baiduSpider (+http://www.yourdomain.com)'
-MY_USER_AGENT = [
+MY_USER_AGENT = {
+    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
     "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; Acoo Browser; SLCC1; .NET CLR 2.0.50727; Media Center PC 5.0; .NET CLR 3.0.04506)",
     "Mozilla/4.0 (compatible; MSIE 7.0; AOL 9.5; AOLBuild 4337.35; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
@@ -52,8 +53,7 @@ MY_USER_AGENT = [
     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:16.0) Gecko/20100101 Firefox/16.0",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11",
     "Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-]
+    "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0", }
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False  # True
@@ -88,6 +88,12 @@ DOWNLOADER_MIDDLEWARES = {
     'baikeSpider.middlewares.MyRetryMiddleware': 501
 }
 
+ITEM_PIPELINES = {
+    'baikeSpider.pipelines.SpiderPipeline': 300,
+    'baikeSpider.pipelines.SpiderRedisPipeline': 301,
+    'baikeSpider.pipelines.WebCachePipeline': 302,
+}
+
 DB_TYPE = 'mysql'
 # mysql的连接配置
 MYSQL_HOST = '127.0.0.1'
@@ -115,7 +121,7 @@ FILTER_BLOCKS = 1
 
 # 指定各网站网页离线缓存路径
 BAIDU_HTML_CACHE = 'E:\Repositories\\baiduSpider\BaiduCache'
-BAIKE_HTML_CACHE = ''
+BAIKE_HTML_CACHE = 'E:\Repositories\\baiduSpider\BaikeCache'
 
 # 指定web资源缓存延时(s)
 WEB_CACHE_DELAY = 1.5
@@ -124,7 +130,12 @@ WEB_CACHE_DELAY = 1.5
 # （DOWNLOAD_DELAY）越短以及（WEB_CACHE_DELAY）越长，缓存并发数则可以稍微设置大一些，
 WEB_CACHE_FEED_SIZE = 3
 
-
 # 日志缓存目录
 LOG_PATH = 'E:\Repositories\\baiduSpider'
 
+# 爬虫名字
+BAIDU_SPIDER_NAME = "baidu_spider"
+BAIKE_SPIDER_NAME = "baike_spider"
+
+# 统一运行爬虫
+COMMANDS_MODULE = 'baikeSpider.commands'

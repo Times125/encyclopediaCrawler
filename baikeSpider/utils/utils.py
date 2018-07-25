@@ -7,6 +7,7 @@
 @Description: 
 """
 import re
+import os
 
 
 def bytes2str(data, encoding='utf8'):
@@ -27,3 +28,13 @@ def strips(path):
     path = re.sub(r'[?\\*|"<>:/]', '', str(path))
     path = path.replace(' ', '-')
     return path
+
+
+def transform_path(path):
+    """
+    :param path: 不同操作系统的文件路径兼容
+    :return:
+    """
+
+    params = path.split(os.sep)
+    pass

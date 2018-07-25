@@ -9,99 +9,100 @@
 import re
 from urllib.parse import unquote
 
-from scrapy import Request
 from scrapy.linkextractors import LinkExtractor
 from scrapy.selector import Selector
 from scrapy.spiders import Rule
 
+from baikeSpider.cache.html_cache import CacheTool
 from baikeSpider.items import BaikespiderItem
 from .redis_spider import RedisCrawlSpider
-from ..settings import BAIKE_ITEM_URLS
+from ..settings import BAIKE_ITEM_URLS, BAIKE_SPIDER_NAME
 
 
 class baikeSpider(RedisCrawlSpider):
     task_queue = BAIKE_ITEM_URLS
     base_url = "https://www.baike.com"
-    name = 'baikeSpider'
+    name = BAIKE_SPIDER_NAME
     allowed_domains = ['www.baike.com']
     rules = (
-        Rule(LinkExtractor(allow=('https://www.baike.com/wiki/')), callback='parse', follow=True),
+        Rule(LinkExtractor(allow=('https://www.baike.com/wiki/',)), callback='parse', follow=True),
     )
-    custom_settings = {
-        'ITEM_PIPELINES': {
-            'baikeSpider.pipelines.BaikespiderPipeline': 300,
-            'baikeSpider.pipelines.BaikeSpiderRedisPipeline': 301,
-        },
-    }
 
     # 重写解析
     def parse(self, response):
         items = BaikespiderItem()
         selector = Selector(response)
         items['url'] = unquote(response.url)
+        items['html'] = response.text
 
         title = selector.xpath("/html/head/title/text()").extract()
-        if len(title) != 0:
+        if title:
             items['title'] = title[0].strip().encode('utf-8', errors='ignore').decode('utf-8')
         else:
             items['title'] = 'none'
-        summary = selector.xpath("//div[@class=\"lemma-summary\"]").xpath("string(.)").extract()
-        if len(summary) != 0:
+        summary = selector.xpath("//div[@class=\"summary\"]//p").xpath("string(.)").extract()
+        if summary:
             tmps = summary[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['summary'] = re.sub('\r\n|\n|\r', ' ', tmps)
         else:
             items['summary'] = 'none'
 
-        catalog = selector.xpath("//div[@class=\"lemmaWgt-lemmaCatalog\"]").xpath("string(.)").extract()
-        if len(catalog) != 0:
+        basic_info = selector.xpath("//div[@class=\"module zoom\"]").xpath("string(.)").extract()
+        if basic_info:
+            tmpb = basic_info[0].encode('utf-8', errors='ignore').decode('utf-8')
+            items['basic_info'] = re.sub('\r\n|\n|\r', ' ', tmpb)
+        else:
+            items['basic_info'] = ''
+
+        catalog = selector.xpath("//fieldset[@id=\"catalog\"]").xpath("string(.)").extract()
+        if catalog:
             tmpc = catalog[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['catalog'] = re.sub('\r\n|\n|\r', ' ', tmpc)
         else:
-            items['catalog'] = 'none'
+            items['catalog'] = ''
 
         # 进行迭代抓取的item链接
-        urls = [unquote(item) for item in
-                selector.xpath("//div[@class=\"para\"]//a[@target=\"_blank\"]/@href").extract()]
-        items['keywords_url'] = list(set(filter(lambda x: 'item' in x, urls)))
+        sub_urls = [unquote(item) for item in selector.xpath("//a[@target=\"_blank\"]/@href").extract()]
+        items['keywords_url'] = list(set(filter(lambda x: 'wiki' in x, sub_urls)))
 
-        description = selector.xpath("//div[@class=\"content-wrapper\"]").xpath("string(.)").extract()
-        if len(description) != 0:
+        description = selector.xpath("//div[@id=\"content\"]").xpath("string(.)").extract()
+        if description:
             tmpd = description[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['description'] = re.sub('\r\n|\n|\r', ' ', tmpd)
         else:
-            items['description'] = 'none'
+            items['description'] = ''
 
-        embed_image_url = selector.xpath("//div[@class=\"para\"]//a[@class=\"image-link\"]//@data-src").extract()
-        if len(embed_image_url) != 0:
-            items['embed_image_url'] = ','.join(embed_image_url)
+        # 匹配pic、js、css
+        items['embed_image_url'] = CacheTool.parse_img(items['html'])
+        items['js'] = CacheTool.parse_js(items['html'])
+        items['css'] = CacheTool.parse_css(items['html'])
+
+        # // *[ @ id = "moreGrayc"]
+        album_pic_url = selector.xpath("//*[@id=\"moreGrayc\"]//a[@id=\"moreId\"]/@href").extract()
+        if album_pic_url:
+            items['album_pic_url'] = unquote(album_pic_url[0])
         else:
-            items['embed_image_url'] = 'none'
+            items['album_pic_url'] = ''
 
-        album_pic_url = selector.xpath("//div[@class=\"album-list\"]//a[@class=\"more-link\"]/@href").extract()
-        if len(album_pic_url) != 0:
-            items['album_pic_url'] = self.base_url + unquote(album_pic_url[0])
-        else:
-            items['album_pic_url'] = 'none'
-
-        update_time = selector.xpath("//span[@class = 'j-modified-time']").xpath("string(.)").extract()
-        if len(update_time) != 0:
+        update_time = selector.xpath("//div[@class = 'rightdiv cooperation cooperation_t']/ol/li[3]").xpath(
+            "string(.)").extract()
+        if update_time:
             tmpu = update_time[0].strip().encode('utf-8', errors='ignore').decode('utf-8')
             items['update_time'] = re.sub('\r\n|\n|\r', ' ', tmpu)
         else:
-            items['update_time'] = 'none'
+            items['update_time'] = ''
 
-        reference_material = selector.xpath(
-            "//dl[@class ='lemma-reference collapse nslog-area log-set-param']").xpath("string(.)").extract()
-        if len(reference_material) != 0:
+        reference_material = selector.xpath("//dl[@class ='reference bor-no']").xpath("string(.)").extract()
+        if reference_material:
             tmpr = reference_material[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['reference_material'] = re.sub('\r\n|\n|\r', ' ', tmpr)
         else:
-            items['reference_material'] = 'none'
+            items['reference_material'] = ''
 
-        item_tag = selector.xpath("//dd[@id = \"open-tag-item\"]").xpath("string(.)").extract()
-        if len(item_tag) != 0:
+        item_tag = selector.xpath("//dd[@id = \"h27\"]").xpath("string(.)").extract()
+        if item_tag:
             tmpi = item_tag[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['item_tag'] = re.sub('\r\n|\n|\r', ' ', tmpi)
         else:
-            items['item_tag'] = 'none'
+            items['item_tag'] = ''
         yield items
