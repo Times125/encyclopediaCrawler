@@ -7,7 +7,6 @@
 @Description: 启动所有爬虫
 """
 from scrapy.commands import ScrapyCommand
-from scrapy.utils.project import get_project_settings
 
 
 class Command(ScrapyCommand):

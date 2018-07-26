@@ -28,7 +28,6 @@ class baikeSpider(RedisCrawlSpider):
         Rule(LinkExtractor(allow=('https://www.baike.com/wiki/',)), callback='parse', follow=True),
     )
 
-    # 重写解析
     def parse(self, response):
         items = BaikespiderItem()
         selector = Selector(response)
