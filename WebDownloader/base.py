@@ -12,7 +12,9 @@ import asyncio
 
 import aiofiles
 from aiohttp import ClientSession
-from baikeSpider.settings import WEB_CACHE_DELAY, WEB_CACHE_FEED_SIZE, BAIDU_HTML_CACHE, BAIKE_HTML_CACHE
+from baikeSpider.settings import (WEB_CACHE_DELAY, WEB_CACHE_FEED_SIZE, BAIDU_HTML_CACHE, BAIKE_HTML_CACHE,
+                                  BAIDU_SPIDER_NAME, BAIKE_SPIDER_NAME, WIKI_ZH_SPIDER_NAME,
+                                  WIKI_EN_SPIDER_NAME)
 from baikeSpider.db.basic import get_redis_conn
 from baikeSpider.utils.utils import bytes2str, strips
 
@@ -20,6 +22,7 @@ from baikeSpider.utils.utils import bytes2str, strips
 class baseDownloader(object):
     """
     下载资源
+
     """
 
     def __init__(self):
@@ -65,6 +68,7 @@ class baseDownloader(object):
 
         return js_res, css_res, pic_res
 
+    # TODO: 文件存储方法改为写入KAFKA
     @classmethod
     async def download_js(cls, url, spiderName, sem):
         async with ClientSession() as session:
@@ -90,6 +94,7 @@ class baseDownloader(object):
                 finally:
                     return res
 
+    # TODO: 文件存储方法改为写入KAFKA
     @classmethod
     async def download_css(cls, url, spiderName, sem):
         async with ClientSession() as session:
@@ -118,6 +123,7 @@ class baseDownloader(object):
                 finally:
                     return res
 
+    # TODO: 文件存储方法改为写入KAFKA
     @classmethod
     async def download_pic(cls, url, spiderName, sem, title):
         async with ClientSession() as session:

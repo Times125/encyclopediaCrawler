@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Scrapy settings for baiduSpider project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     https://doc.scrapy.org/en/latest/topics/settings.html
-#     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = 'baikeSpider'
 
@@ -15,8 +8,7 @@ SPIDER_MODULES = ['baikeSpider.spiders']
 NEWSPIDER_MODULE = 'baikeSpider.spiders'
 FEED_EXPORT_ENCODING = 'utf-8'  # 中文转码
 LOG_LEVEL = 'ERROR'
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'baiduSpider (+http://www.yourdomain.com)'
+
 MY_USER_AGENT = {
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
@@ -109,12 +101,16 @@ REDIS_PORT = 6379
 SPIDER_FEED_SIZE = 32
 
 # 爬虫要抓取的任务队列
-BAIDU_ITEM_URLS = 'task_queue:baiduSpider'
-BAIKE_ITEM_URLS = 'task_queue:baikeSpider'
+BAIDU_ITEM_URLS = 'task_queue:baidu_spider'
+BAIKE_ITEM_URLS = 'task_queue:baike_spider'
+WIKI_ZH_ITEM_URLS = 'task_queue:wiki_zh_spider'
+WIKI_EN_ITEM_URLS = 'task_queue:wiki_en_spider'
 
 # 爬虫已爬词条布隆过滤器
-BAIDU_BLOOM_KEY = 'bloomfilter:baiduSpider'
-BAIKE_BLOOM_KEY = 'bloomfilter:baikeSpider'
+BAIDU_BLOOM_KEY = 'bloomfilter:baidu_spider'
+BAIKE_BLOOM_KEY = 'bloomfilter:baike_spider'
+WIKI_ZH_BLOOM_KEY = 'bloomfilter:wiki_zh_spider'
+WIKI_EN_BLOOM_KEY = 'bloomfilter:wiki_en_spider'
 
 # 布隆过滤器block数量
 FILTER_BLOCKS = 1
@@ -136,6 +132,12 @@ LOG_PATH = 'E:\Repositories\\baiduSpider'
 # 爬虫名字
 BAIDU_SPIDER_NAME = "baidu_spider"
 BAIKE_SPIDER_NAME = "baike_spider"
+WIKI_ZH_SPIDER_NAME = "wiki_zh_spider"
+WIKI_EN_SPIDER_NAME = "wiki_en_spider"
 
 # 统一运行爬虫
 COMMANDS_MODULE = 'baikeSpider.commands'
+
+# 代理IP和PORT
+PROXY_IP = ""
+PROXY_PORT = ""

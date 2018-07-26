@@ -24,23 +24,7 @@ import asyncio
 import aiofiles
 from aiohttp import ClientSession
 from WebDownloader.base import baseDownloader
-
-class A(object):
-    def a(self, m):
-        self.b()
-        print('a', m, type(self))
-
-
-class B(object):
-    def b(self):
-        print('b', type(self))
-
-
-class C(A, B):
-    def __init__(self):
-        obj = super(C, self)
-        obj.a(3)
-
+from baikeSpider.cache.html_cache import CacheTool
 
 async def download_js(url, sem):
     async with ClientSession() as session:
@@ -147,26 +131,30 @@ if __name__ == "__main__":
 
     # path = 'test.css'
     # css_filename = '{}/{}'.format("E:\Repositories\\baiduSpider\BaiduCache\css_resources", path)
-    # with open(css_filename, 'w+', encoding='utf8') as writter:
-    #     writter.write(bytes2str('hello'))
-
-    redis_batch_size = WEB_CACHE_FEED_SIZE
-    task_queue = "resources:cache_task_queue"
-    fetch_one = get_redis_conn().lpop
-    while True:
-        time.sleep(WEB_CACHE_DELAY)
-        found = 0
-        start_time = time.time()
-        while found < redis_batch_size:
-            data = fetch_one(task_queue)
-
-            if not data:
-                # Queue empty.
-                break
-            data = eval(data)
-            req1, req2, req3 = make_request_from_data(data)
-            # if req1 and req2 and req3:
-            #     # yield req
-            found += 1
-        end_time = time.time()
-        print(end_time - start_time)
+    with open('twitter.html', 'r', encoding='utf8') as r:
+        html = r.read()
+    pic_url = re.compile(r'src="(//*.+?\.[jpg]*[png]*[gif]*)"')
+    list_pic = re.findall(pic_url, html)
+    list_pic = ['https:' + pic for pic in list(set(filter(lambda x: '/static/images/' not in x, list_pic)))]
+    for i in list_pic:
+        print(i)
+    # redis_batch_size = WEB_CACHE_FEED_SIZE
+    # task_queue = "resources:cache_task_queue"
+    # fetch_one = get_redis_conn().lpop
+    # while True:
+    #     time.sleep(WEB_CACHE_DELAY)
+    #     found = 0
+    #     start_time = time.time()
+    #     while found < redis_batch_size:
+    #         data = fetch_one(task_queue)
+    #
+    #         if not data:
+    #             # Queue empty.
+    #             break
+    #         data = eval(data)
+    #         req1, req2, req3 = make_request_from_data(data)
+    #         # if req1 and req2 and req3:
+    #         #     # yield req
+    #         found += 1
+    #     end_time = time.time()
+    #     print(end_time - start_time)

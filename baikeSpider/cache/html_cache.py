@@ -40,6 +40,14 @@ class CacheTool(object):
         list_js = list(set(list_js))
         return list_js
 
+    # wiki的页面图片解析，和百科有点不一样
+    @classmethod
+    def parse_wiki_pic(cls, html):
+        pic_url = re.compile(r'src="(//*.+?\.[jpg]*[png]*[gif]*)"')
+        list_pic = re.findall(pic_url, html)
+        list_pic = ['https:' + pic for pic in list(set(filter(lambda x: '/static/images/' not in x, list_pic)))]
+        return list_pic
+
     @classmethod
     def get_response(cls, url, spider, title):
         try:
