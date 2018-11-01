@@ -17,13 +17,13 @@ from scrapy.spiders import Rule
 from baikeSpider.cache.html_cache import CacheTool
 from baikeSpider.items import WikiENSpiderItem
 from .redis_spider import RedisCrawlSpider
-from ..settings import WIKI_EN_ITEM_URLS, WIKI_EN_SPIDER_NAME
+from ..config import wiki_en_task_queue, wiki_en_spider_name
 
 
 class WikiENSpider(RedisCrawlSpider):
-    task_queue = WIKI_EN_ITEM_URLS
+    task_queue = wiki_en_task_queue
     base_url = "https://en.wikipedia.org"
-    name = WIKI_EN_SPIDER_NAME
+    name = wiki_en_spider_name
     allowed_domains = ['en.wikipedia.org']
     rules = (
         Rule(LinkExtractor(allow=('https://en.wikipedia.org/wiki/',)), callback='parse', follow=True),

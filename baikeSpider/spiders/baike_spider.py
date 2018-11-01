@@ -16,13 +16,13 @@ from scrapy.spiders import Rule
 from baikeSpider.cache.html_cache import CacheTool
 from baikeSpider.items import BaikeSpiderItem
 from .redis_spider import RedisCrawlSpider
-from ..settings import BAIKE_ITEM_URLS, BAIKE_SPIDER_NAME
+from ..config import baike_task_queue, baike_spider_name
 
 
 class BaikeSpider(RedisCrawlSpider):
-    task_queue = BAIKE_ITEM_URLS
+    task_queue = baike_task_queue
     base_url = "https://www.baike.com"
-    name = BAIKE_SPIDER_NAME
+    name = baike_spider_name
     allowed_domains = ['www.baike.com']
     rules = (
         Rule(LinkExtractor(allow=('https://www.baike.com/wiki/',)), callback='parse', follow=True),

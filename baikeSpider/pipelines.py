@@ -5,73 +5,110 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-import os
-from .db.model import BaiduItemData, BaikeItemData, WikiZHItemData, WikiENItemData
-from .db.dao import CommandOperate
-from .db.basic import get_redis_conn
-from .utils.log import logger
+from datetime import datetime
+
+from .db import (BaiduItemData, BaikeItemData, WikiZHItemData,
+                 WikiENItemData, CommandOperate, common_con)
+from .logger import db_logger
 from .bloomfilter.filter import BloomFilterRedis
-from .settings import (FILTER_BLOCKS, BAIDU_BLOOM_KEY, BAIKE_BLOOM_KEY, BAIDU_ITEM_URLS, BAIKE_ITEM_URLS,
-                       BAIDU_SPIDER_NAME, BAIKE_SPIDER_NAME, WIKI_ZH_BLOOM_KEY, WIKI_EN_BLOOM_KEY, WIKI_ZH_SPIDER_NAME,
-                       WIKI_EN_SPIDER_NAME, WIKI_ZH_ITEM_URLS, WIKI_EN_ITEM_URLS)
+from .config import (filter_blocks, baidu_bloom_key, baike_bloom_key,
+                     baidu_task_queue, baike_task_queue,
+                     baidu_spider_name, baike_spider_name,
+                     wiki_zh_bloom_key, wiki_en_bloom_key, wiki_zh_spider_name,
+                     wiki_en_spider_name, wiki_zh_task_queue, wiki_en_task_queue)
 
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
     from io import BytesIO
 
-handle = get_redis_conn()
-
 
 class SpiderPipeline(object):
     """ 百度、互动百科 """
 
     def process_item(self, item, spider):
-        if spider.name == BAIDU_SPIDER_NAME:
-            try:
-                data = BaiduItemData(name=item['title'], url=item['url'], summary=item['summary'],
-                                     basic_info=item['basic_info'],
-                                     catalog=item['catalog'], description=item['description'],
-                                     embed_image_url=','.join(item['embed_image_url']),
-                                     album_pic_url=item['album_pic_url'],
-                                     reference_material=item['reference_material'], update_time=item['update_time'],
-                                     item_tag=item['item_tag'])
-                CommandOperate.add_one(data)
 
-            except Exception as e:
-                logger.error(e)
-        elif spider.name == BAIKE_SPIDER_NAME:
+        fetch_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if spider.name == baidu_spider_name:
             try:
-                data = BaikeItemData(name=item['title'], url=item['url'], summary=item['summary'],
-                                     basic_info=item['basic_info'],
-                                     catalog=item['catalog'], description=item['description'],
-                                     embed_image_url=','.join(item['embed_image_url']),
-                                     album_pic_url=item['album_pic_url'],
-                                     reference_material=item['reference_material'], update_time=item['update_time'],
-                                     item_tag=item['item_tag'])
+                data = BaiduItemData()
+                data.name = item['title']
+                data.url = item['url']
+                data.summary = item['summary']
+                data.basic_info = item['basic_info']
+                data.catalog = item['catalog']
+                data.description = item['description']
+                data.embed_image_url = ','.join(item['embed_image_url'])
+                data.album_pic_url = item['album_pic_url']
+                data.reference_material = item['reference_material']
+                data.update_time = item['update_time']
+                data.item_tag = item['item_tag']
+                data.fetch_time = fetch_time
                 CommandOperate.add_one(data)
             except Exception as e:
-                logger.error(e)
-        elif spider.name == WIKI_ZH_SPIDER_NAME:
+                db_logger.error(e)
+        elif spider.name == baike_spider_name:
             try:
-                data = WikiZHItemData(name=item['title'], url=item['url'], note=item['note'],
-                                      catalog=item['catalog'], description=item['description'],
-                                      embed_image_url=','.join(item['embed_image_url']),
-                                      reference_material=item['reference_material'], update_time=item['update_time'],
-                                      item_tag=item['item_tag'])
+                # data = BaikeItemData(name=item['title'], url=item['url'], summary=item['summary'],
+                #                      basic_info=item['basic_info'],
+                #                      catalog=item['catalog'], description=item['description'],
+                #                      embed_image_url=','.join(item['embed_image_url']),
+                #                      album_pic_url=item['album_pic_url'],
+                #                      reference_material=item['reference_material'], update_time=item['update_time'],
+                #                      item_tag=item['item_tag'])
+                data = BaikeItemData()
+                data.name = item['title']
+                data.url = item['url']
+                data.summary = item['summary']
+                data.basic_info = item['basic_info']
+                data.catalog = item['catalog']
+                data.description = item['description']
+                data.embed_image_url = ','.join(item['embed_image_url'])
+                data.album_pic_url = item['album_pic_url']
+                data.reference_material = item['reference_material']
+                data.update_time = item['update_time']
+                data.item_tag = item['item_tag']
+                data.fetch_time = fetch_time
                 CommandOperate.add_one(data)
             except Exception as e:
-                logger.error(e)
-        elif spider.name == WIKI_EN_SPIDER_NAME:
+                db_logger.error(e)
+        elif spider.name == wiki_zh_spider_name:
             try:
-                data = WikiENItemData(name=item['title'], url=item['url'], note=item['note'],
-                                      catalog=item['catalog'], description=item['description'],
-                                      embed_image_url=','.join(item['embed_image_url']),
-                                      reference_material=item['reference_material'], update_time=item['update_time'],
-                                      item_tag=item['item_tag'])
+                data = WikiZHItemData()
+                data.name = item['title']
+                data.url = item['url']
+                data.note = item['note']
+                data.catalog = item['catalog']
+                data.description = item['description']
+                data.embed_image_url = ','.join(item['embed_image_url'])
+                data.reference_material = item['reference_material']
+                data.update_time = item['update_time']
+                data.item_tag = item['item_tag']
+                data.fetch_time = fetch_time
                 CommandOperate.add_one(data)
             except Exception as e:
-                logger.error(e)
+                db_logger.error(e)
+        elif spider.name == wiki_en_spider_name:
+            try:
+                # data = WikiENItemData(name=item['title'], url=item['url'], note=item['note'],
+                #                       catalog=item['catalog'], description=item['description'],
+                #                       embed_image_url=','.join(item['embed_image_url']),
+                #                       reference_material=item['reference_material'], update_time=item['update_time'],
+                #                       item_tag=item['item_tag'])
+                data = WikiENItemData()
+                data.name = item['title']
+                data.url = item['url']
+                data.note = item['note']
+                data.catalog = item['catalog']
+                data.description = item['description']
+                data.embed_image_url = ','.join(item['embed_image_url'])
+                data.reference_material = item['reference_material']
+                data.update_time = item['update_time']
+                data.item_tag = item['item_tag']
+                data.fetch_time = fetch_time
+                CommandOperate.add_one(data)
+            except Exception as e:
+                db_logger.error(e)
         return item
 
 
@@ -80,48 +117,48 @@ class SpiderRedisPipeline(object):
     """ use bloomfilter to filter the request which had been sent """
     # 百度百科
     base_url = "https://baike.baidu.com"
-    bf = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIDU_BLOOM_KEY)
+    bf = BloomFilterRedis(block=filter_blocks, key=baidu_bloom_key)
     # 互动百科
-    bf2 = BloomFilterRedis(block=FILTER_BLOCKS, key=BAIKE_BLOOM_KEY)
+    bf2 = BloomFilterRedis(block=filter_blocks, key=baike_bloom_key)
     # 维基中文百科
     base_url_ZH = "https://zh.wikipedia.org"
-    bf3 = BloomFilterRedis(block=FILTER_BLOCKS, key=WIKI_ZH_BLOOM_KEY)
+    bf3 = BloomFilterRedis(block=filter_blocks, key=wiki_zh_bloom_key)
 
     # 维基英文百科
     base_url_EN = "https://en.wikipedia.org"
-    bf4 = BloomFilterRedis(block=FILTER_BLOCKS, key=WIKI_EN_BLOOM_KEY)
+    bf4 = BloomFilterRedis(block=filter_blocks, key=wiki_en_bloom_key)
 
     def process_item(self, item, spider):
         if not item['keywords_url']:
             return item
-        if spider.name == BAIDU_SPIDER_NAME:
+        if spider.name == baidu_spider_name:
             for url in item['keywords_url']:
                 if self.bf.is_exists(url):
                     continue
                 else:
                     new_url = self.base_url + url
-                    handle.lpush(BAIDU_ITEM_URLS, new_url)
-        elif spider.name == BAIKE_SPIDER_NAME:
+                    common_con.lpush(baidu_task_queue, new_url)
+        elif spider.name == baike_spider_name:
             for url in item['keywords_url']:
                 if self.bf2.is_exists(url):
                     continue
                 else:
                     new_url = url
-                    handle.lpush(BAIKE_ITEM_URLS, new_url)
-        elif spider.name == WIKI_ZH_SPIDER_NAME:
+                    common_con.lpush(baike_task_queue, new_url)
+        elif spider.name == wiki_zh_spider_name:
             for url in item['keywords_url']:
                 if self.bf3.is_exists(url):
                     continue
                 else:
                     new_url = self.base_url_ZH + url
-                    handle.lpush(WIKI_ZH_ITEM_URLS, new_url)
-        elif spider.name == WIKI_EN_SPIDER_NAME:
+                    common_con.lpush(wiki_zh_task_queue, new_url)
+        elif spider.name == wiki_en_spider_name:
             for url in item['keywords_url']:
                 if self.bf4.is_exists(url):
                     continue
                 else:
                     new_url = self.base_url_EN + url
-                    handle.lpush(WIKI_EN_ITEM_URLS, new_url)
+                    common_con.lpush(wiki_en_task_queue, new_url)
         return item
 
 
@@ -136,7 +173,7 @@ class WebCachePipeline(object):
         css_urls = []
         bf = BloomFilterRedis(block=1, key=bloomKey)
         # WIKI网站没有可以下载的js和css
-        if spider.name in (BAIKE_SPIDER_NAME, BAIDU_SPIDER_NAME):
+        if spider.name in (baike_spider_name, baidu_spider_name):
             for url in item['js']:
                 if bf.is_exists(url):
                     continue
@@ -152,6 +189,6 @@ class WebCachePipeline(object):
         key = "{}:{}".format("resources", "cache_task_queue")
         value = dict(title=item['title'], from2=spider.name, htm=item['html'], js=js_urls, css=css_urls,
                      pic=item['embed_image_url'])
-        handle.lpush(key, value)
+        common_con.lpush(key, value)
         print('from:', spider.name)
         return item

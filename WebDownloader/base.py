@@ -12,10 +12,10 @@ import asyncio
 
 import aiofiles
 from aiohttp import ClientSession
-from baikeSpider.settings import (WEB_CACHE_DELAY, WEB_CACHE_FEED_SIZE, BAIDU_HTML_CACHE, BAIKE_HTML_CACHE,
-                                  BAIDU_SPIDER_NAME, BAIKE_SPIDER_NAME, WIKI_ZH_SPIDER_NAME,
-                                  WIKI_EN_SPIDER_NAME)
-from baikeSpider.db.basic import get_redis_conn
+from baikeSpider.settings import (WEB_CACHE_DELAY, WEB_CACHE_FEED_SIZE, BAIDU_HTML_CACHE, BAIKE_HTML_CACHE, )
+from baikeSpider.config import (baidu_spider_name, baike_spider_name, wiki_zh_spider_name,
+                                wiki_en_spider_name)
+from baikeSpider.db import common_con
 from baikeSpider.utils.utils import bytes2str, strips
 
 
@@ -31,7 +31,7 @@ class baseDownloader(object):
     def run(self):
         redis_batch_size = WEB_CACHE_FEED_SIZE
         task_queue = "resources:cache_task_queue"
-        fetch_one = get_redis_conn().lpop
+        fetch_one = common_con.lpop
         while True:
             time.sleep(WEB_CACHE_DELAY)
             found = 0

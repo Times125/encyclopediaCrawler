@@ -1,7 +1,7 @@
 from scrapy import signals
 from scrapy.exceptions import DontCloseSpider
 from scrapy.spiders import Spider, CrawlSpider
-from ..db.basic import get_redis_conn
+from ..db import common_con
 from ..utils.utils import bytes2str
 from ..settings import SPIDER_FEED_SIZE
 
@@ -21,7 +21,7 @@ class RedisMixin(object):
         """Setup redis connection and idle signal.
         send idle signal when spider is free
         """
-        self.redis_con = get_redis_conn()
+        self.redis_con = common_con
         crawler.signals.connect(self.spider_idle, signal=signals.spider_idle)
 
     def next_requests(self):

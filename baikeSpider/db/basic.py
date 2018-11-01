@@ -3,43 +3,56 @@
 @Time:   
 @Description: 
 """
-import redis
 from sqlalchemy import create_engine, MetaData
-from ..config.conf import get_mysql_args, get_redis_args
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import (sessionmaker, scoped_session)
 from sqlalchemy.ext.declarative import declarative_base
 from pymysql.err import OperationalError
-from ..utils.log import logger
+from contextlib import contextmanager
+from ..logger import db_logger
+from ..config import (db_host, db_port, db_name,
+                      db_pwd, db_user,
+                      db_type, db_charset)
 
-
-# 获取redis连接
-def get_redis_conn():
-    redis_args = get_redis_args()
-    host = redis_args['host']
-    port = redis_args['port']
-    pool = redis.ConnectionPool(host=host, port=port)
-    handle = redis.StrictRedis(connection_pool=pool, charset='utf-8')
-    return handle
+__all__ = ['metadata', 'Base', 'get_db_session', 'create_db']
 
 
 # 获取mysql引擎
 def get_engine():
     try:
-        args = get_mysql_args()
+
         """数据库类型+数据库驱动名称://用户名:口令@机器地址:端口号/数据库名"""
-        connect_str = "{}+pymysql://{}:{}@{}:{}/{}?charset={}".format(args['db_type'], args['user'], args['password'],
-                                                                      args['host'], args['port'], args['database'],
-                                                                      args['charset'])
+        connect_str = "{}+pymysql://{}:{}@{}:{}/{}?charset={}".format(db_type, db_user, db_pwd,
+                                                                      db_host, db_port, db_name,
+                                                                      db_charset)
         print(connect_str)
-        egine = create_engine(connect_str, encoding="utf-8", pool_size=10, echo=False)
+        egine = create_engine(connect_str, encoding="utf-8", pool_size=10, echo=False, pool_recycle=7200)
         return egine
     except OperationalError as e:
-        logger.error(e)
+        db_logger.error(e)
+
+
+def create_db():
+    connect_str = "{}+pymysql://{}:{}@{}:{}".format(db_type, db_user, db_pwd,
+                                                    db_host, db_port, db_charset)
+    mysql_engine = create_engine(connect_str, echo=True)
+    sql_str = "CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARSET utf8mb4;".format(db_name)
+    mysql_engine.execute(sql_str)
 
 
 engine = get_engine()
-Session = sessionmaker(bind=engine)
 Base = declarative_base()
-db_session = Session()
+metadata = MetaData(engine)
+session_factory = sessionmaker(bind=engine, expire_on_commit=False)
+Session = scoped_session(session_factory)
 
-__all__ = ['engine', 'Base', 'db_session']
+
+@contextmanager
+def get_db_session():
+    try:
+        db_session = Session()
+        try:
+            yield db_session
+        finally:
+            db_session.close()
+    except Exception as e:
+        db_logger.error("get database session error {}".format(e))

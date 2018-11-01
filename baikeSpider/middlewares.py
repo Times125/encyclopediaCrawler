@@ -6,7 +6,7 @@ from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.utils.response import response_status_message
 from .settings import PROXY_IP, PROXY_PORT
 
-from .db.basic import get_redis_conn
+from .db import common_con
 
 
 class MyUserAgentMiddleware(UserAgentMiddleware):
@@ -31,7 +31,7 @@ class MyUserAgentMiddleware(UserAgentMiddleware):
 
 class MyRetryMiddleware(RetryMiddleware):
     """ 重试失败则将url放到失败任务队列 """
-    handle = get_redis_conn()
+    handle = common_con
 
     def process_response(self, request, response, spider):
         if request.meta.get('dont_retry', False):

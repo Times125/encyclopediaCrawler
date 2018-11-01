@@ -17,13 +17,13 @@ from scrapy.spiders import Rule
 from baikeSpider.cache.html_cache import CacheTool
 from baikeSpider.items import WikiZHSpiderItem
 from .redis_spider import RedisCrawlSpider
-from ..settings import WIKI_ZH_ITEM_URLS, WIKI_ZH_SPIDER_NAME
+from ..config import wiki_zh_task_queue, wiki_zh_spider_name
 
 
 class WikeZHSpider(RedisCrawlSpider):
-    task_queue = WIKI_ZH_ITEM_URLS
+    task_queue = wiki_zh_task_queue
     base_url = "https://zh.wikipedia.org"
-    name = WIKI_ZH_SPIDER_NAME
+    name = wiki_zh_spider_name
     allowed_domains = ['zh.wikipedia.org']
     rules = (
         Rule(LinkExtractor(allow=('https://zh.wikipedia.org/wiki/',)), callback='parse', follow=True),

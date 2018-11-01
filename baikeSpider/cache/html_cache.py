@@ -10,7 +10,7 @@ import re
 import urllib3
 import random
 from ..settings import MY_USER_AGENT
-from ..utils.log import logger
+from ..logger import download_logger
 
 
 class FileException(Exception):
@@ -55,17 +55,17 @@ class CacheTool(object):
             http = urllib3.PoolManager(timeout=5)
             response = http.request('GET', url, retries=3, headers={'User_Agent': userAgent})
             if response.status != 200:
-                logger.warning(
+                download_logger.warning(
                     'response status is not 200 when request [%s] from [%s]. spider : [%s]' % (url, title, spider.name))
                 raise FileException
             if not response.data:
-                logger.warning(
+                download_logger.warning(
                     'response content is empty when request [%s] from [%s]. spider : [%s]' % (url, title, spider.name))
                 raise FileException
             return response
 
         except Exception as e:
-            logger.error(
+            download_logger.error(
                 'response exception:[%s] when request [%s] from [%s]. spider : [%s]' % (e, url, title, spider.name))
 
     @classmethod

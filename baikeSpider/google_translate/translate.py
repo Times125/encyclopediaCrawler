@@ -14,6 +14,9 @@ import json
 import asyncio
 from aiohttp import ClientSession
 from baikeSpider.settings import MY_USER_AGENT
+from ..logger import download_logger
+
+__all__ = ['GoogleTranslate']
 
 
 class Py4Js(object):
@@ -82,6 +85,7 @@ class GoogleTranslate(object):
                         data = response.decode('utf8')
                 except TimeoutError as e:
                     print(e)
+                    download_logger.error("google translate timeout: {} ".format(e))
                 finally:
                     return data
 
@@ -131,6 +135,7 @@ class GoogleTranslate(object):
 
 if __name__ == '__main__':
     import time
+
     gl = GoogleTranslate()
     c = '''
     President Donald Trump should work to form a "cyber NATO" in response to the Russian attack on the 2016 US elections and to prevent more cyber attacks, Rep. Joaquin Castro said Wednesday, even though NATO already cooperates on cybersecurity.
@@ -158,6 +163,6 @@ Castro also questioned Trump's commitment to protecting the US from attacks."Rig
     start = time.time()
     gl.translate(c)
     end = time.time()
-    print("总共耗时%s秒" %(end - start))
+    print("总共耗时%s秒" % (end - start))
     # for i in range(10):
     #     print(gl.randomAgent())

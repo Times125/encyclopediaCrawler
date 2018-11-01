@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-@Author:lichunhui
-@Time:  2018/7/19 16:04
+@Author:_defined
+@Time:  2018/8/28 19:51
 @Description: 
 """
-from .translate import *
+from .log import *
+

@@ -11,14 +11,14 @@ from scrapy.selector import Selector
 from baikeSpider.items import BaiduSpiderItem
 from scrapy.linkextractors import LinkExtractor
 from .redis_spider import RedisCrawlSpider
-from ..settings import BAIDU_ITEM_URLS, BAIDU_SPIDER_NAME
+from ..config import baidu_task_queue, baidu_spider_name
 from ..cache.html_cache import CacheTool
 
 
 class BaiduSpider(RedisCrawlSpider):
-    task_queue = BAIDU_ITEM_URLS
+    task_queue = baidu_task_queue
     base_url = "https://baike.baidu.com"
-    name = BAIDU_SPIDER_NAME
+    name = baidu_spider_name
     allowed_domains = ['baike.baidu.com']
     rules = (
         Rule(LinkExtractor(allow=('https://baike.baidu.com/item/',)), callback='parse', follow=True),

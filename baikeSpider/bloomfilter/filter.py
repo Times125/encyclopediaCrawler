@@ -6,8 +6,10 @@
 @Time:  2018/7/3 15:28
 @Description: 
 """
-from baikeSpider.db.basic import get_redis_conn
-from . import hashfuncs
+from ..db import bloomfilter_con
+from ..bloomfilter import hashfuncs
+
+__all__ = ['BloomFilterRedis', ]
 
 
 class BloomFilterRedis:
@@ -19,7 +21,7 @@ class BloomFilterRedis:
         """redis的一个string最大为512M,所以需要block进行扩容"""
         self.key = key if key else self.default_key
         self.blcok = block
-        self.conn = get_redis_conn()
+        self.conn = bloomfilter_con
 
     @classmethod
     def random_generator(cls, hash_value):
@@ -38,7 +40,7 @@ class BloomFilterRedis:
         for hash_func_str in self.hash_list:
             hash_func = getattr(hashfuncs, hash_func_str)
             hash_value = hash_func(url)
-            real_value = BloomFilterRedis.random_generator(hash_value)
+            real_value = self.random_generator(hash_value)
             cur_block = str(real_value % self.blcok)
             key = ''.join((self.key, cur_block))
             if self.conn.getbit(key, real_value) == 0:

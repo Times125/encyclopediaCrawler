@@ -86,34 +86,7 @@ ITEM_PIPELINES = {
     'baikeSpider.pipelines.WebCachePipeline': 302,
 }
 
-DB_TYPE = 'mysql'
-# mysql的连接配置
-MYSQL_HOST = '127.0.0.1'
-MYSQL_PORT = 3306
-MYSQL_USER = 'root'
-MYSQL_PWD = ''
-MYSQL_DB = 'test'
-MYSQL_CHARSET = 'utf8mb4'
-
-# redis的连接配置，默认为本机
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
 SPIDER_FEED_SIZE = 32
-
-# 爬虫要抓取的任务队列
-BAIDU_ITEM_URLS = 'task_queue:baidu_spider'
-BAIKE_ITEM_URLS = 'task_queue:baike_spider'
-WIKI_ZH_ITEM_URLS = 'task_queue:wiki_zh_spider'
-WIKI_EN_ITEM_URLS = 'task_queue:wiki_en_spider'
-
-# 爬虫已爬词条布隆过滤器
-BAIDU_BLOOM_KEY = 'bloomfilter:baidu_spider'
-BAIKE_BLOOM_KEY = 'bloomfilter:baike_spider'
-WIKI_ZH_BLOOM_KEY = 'bloomfilter:wiki_zh_spider'
-WIKI_EN_BLOOM_KEY = 'bloomfilter:wiki_en_spider'
-
-# 布隆过滤器block数量
-FILTER_BLOCKS = 1
 
 # 指定各网站网页离线缓存路径
 BAIDU_HTML_CACHE = 'E:\Repositories\\baiduSpider\BaiduCache'
@@ -126,18 +99,9 @@ WEB_CACHE_DELAY = 1.5
 # （DOWNLOAD_DELAY）越短以及（WEB_CACHE_DELAY）越长，缓存并发数则可以稍微设置大一些，
 WEB_CACHE_FEED_SIZE = 3
 
-# 日志缓存目录
-LOG_PATH = 'E:\Repositories\\baiduSpider'
-
-# 爬虫名字
-BAIDU_SPIDER_NAME = "baidu_spider"
-BAIKE_SPIDER_NAME = "baike_spider"
-WIKI_ZH_SPIDER_NAME = "wiki_zh_spider"
-WIKI_EN_SPIDER_NAME = "wiki_en_spider"
-
 # 统一运行爬虫
 COMMANDS_MODULE = 'baikeSpider.commands'
 
 # 代理IP和PORT
-PROXY_IP = ""
-PROXY_PORT = ""
+PROXY_IP = "202.115.44.136"
+PROXY_PORT = "8123"

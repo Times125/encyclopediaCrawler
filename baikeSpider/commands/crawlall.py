@@ -8,6 +8,8 @@
 """
 from scrapy.commands import ScrapyCommand
 
+__all__ = ['Command']
+
 
 class Command(ScrapyCommand):
     requires_project = True
