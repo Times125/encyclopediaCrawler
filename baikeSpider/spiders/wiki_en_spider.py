@@ -110,5 +110,5 @@ class WikiENSpider(RedisCrawlSpider):
             items['item_tag'] = re.sub('(\r\n){2,}|\n{2,}|\r{2,}', '\n', tmpi)
         else:
             items['item_tag'] = ''
-        # print('英文===================>', items['title'])
+        # print("英文===============>", items['title'])
         yield items
