@@ -168,10 +168,10 @@ class WebCachePipeline(object):
     """ push the resource urls into task queue """
 
     def process_item(self, item, spider):
-        bloomKey = "{}:{}".format("bloomfilter", "CacheCSSandJSFilter")
+        bloomKey = "{}.{}".format("bloomfilter", "CacheCSSandJSFilter")
         js_urls = []
         css_urls = []
-        bf = BloomFilterRedis(block=1, key=bloomKey)
+        bf = BloomFilterRedis(block=2, key=bloomKey)
         # WIKI网站没有可以下载的js和css
         if spider.name in (baike_spider_name, baidu_spider_name):
             for url in item['js']:
@@ -186,9 +186,9 @@ class WebCachePipeline(object):
                 else:
                     css_urls.append(url)
 
-        key = "{}:{}".format("resources", "cache_task_queue")
+        key = "{}.{}".format("resources", "cache_task_queue")
         value = dict(title=item['title'], from2=spider.name, htm=item['html'], js=js_urls, css=css_urls,
                      pic=item['embed_image_url'])
         common_con.lpush(key, value)
-        print('from:', spider.name)
+        # print('from:', spider.name)
         return item

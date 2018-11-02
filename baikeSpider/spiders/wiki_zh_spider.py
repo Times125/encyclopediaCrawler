@@ -110,5 +110,5 @@ class WikeZHSpider(RedisCrawlSpider):
             items['item_tag'] = re.sub('(\r\n){2,}|\n{2,}|\r{2,}', '\n', tmpi)
         else:
             items['item_tag'] = ''
-        print(items['url'], items['keywords_url'])
+        # print("中文===============>", items['title'])
         yield items

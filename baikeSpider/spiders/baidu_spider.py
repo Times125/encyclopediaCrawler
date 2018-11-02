@@ -99,7 +99,7 @@ class BaiduSpider(RedisCrawlSpider):
         if reference_material:
             tmpr = reference_material[0].encode('utf-8', errors='ignore').decode('utf-8')
             items['reference_material'] = re.sub('(\r\n){2,}|\n{2,}|\r{2,}', '\n', tmpr)
-            print(items['reference_material'])
+            # print(items['reference_material'])
         else:
             items['reference_material'] = ''
 

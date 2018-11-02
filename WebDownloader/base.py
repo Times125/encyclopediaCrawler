@@ -30,7 +30,7 @@ class baseDownloader(object):
 
     def run(self):
         redis_batch_size = WEB_CACHE_FEED_SIZE
-        task_queue = "resources:cache_task_queue"
+        task_queue = "resources.cache_task_queue"
         fetch_one = common_con.lpop
         while True:
             time.sleep(WEB_CACHE_DELAY)
