@@ -7,6 +7,7 @@
 @Description: 
 """
 import re
+import copy
 from itertools import chain
 from urllib.parse import unquote
 
@@ -111,4 +112,4 @@ class WikeZHSpider(RedisCrawlSpider):
         else:
             items['item_tag'] = ''
         # print("中文===============>", items['title'])
-        yield items
+        yield copy.deepcopy(items)

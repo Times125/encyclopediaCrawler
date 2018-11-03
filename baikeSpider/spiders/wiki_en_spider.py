@@ -7,6 +7,7 @@
 @Description: 
 """
 import re
+import copy
 from itertools import chain
 from urllib.parse import unquote
 
@@ -111,4 +112,4 @@ class WikiENSpider(RedisCrawlSpider):
         else:
             items['item_tag'] = ''
         # print("英文===============>", items['title'])
-        yield items
+        yield copy.deepcopy(items)

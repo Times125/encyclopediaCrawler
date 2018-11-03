@@ -32,11 +32,14 @@ class RedisMixin(object):
             data = fetch_one(self.task_queue)
             if not data:
                 # Queue empty.
+                print("队列是空的")
                 break
             req = self.make_request_from_data(data)
             if req:
-                yield req
                 found += 1
+                yield req
+            else:
+                print('没有下一个req')
 
     def make_request_from_data(self, data):
         """Returns a Request instance from data coming from Redis.

@@ -4,6 +4,7 @@
 @Description: 百度百科爬虫
 """
 import re
+import copy
 from urllib.parse import unquote
 
 from scrapy.spiders import Rule
@@ -109,5 +110,6 @@ class BaiduSpider(RedisCrawlSpider):
             items['item_tag'] = re.sub('(\r\n){2,}|\n{2,}|\r{2,}', '\n', tmpi)
         else:
             items['item_tag'] = ''
-        yield items
+        print('百度百科爬虫==》', items['title'])
+        yield copy.deepcopy(items)  # 深拷贝的目的是默认浅拷贝item会在后面的pipelines传递过程中会出现错误，比如串数据了
         # print(items['title'])

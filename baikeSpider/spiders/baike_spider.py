@@ -7,6 +7,7 @@
 @Description: 互动百科爬虫
 """
 import re
+import copy
 from urllib.parse import unquote
 
 from scrapy.linkextractors import LinkExtractor
@@ -21,12 +22,12 @@ from ..config import baike_task_queue, baike_spider_name
 
 class BaikeSpider(RedisCrawlSpider):
     task_queue = baike_task_queue
-    base_url = "https://www.baike.com"
+    base_url = "http://www.baike.com"
     name = baike_spider_name
     allowed_domains = ['www.baike.com']
     rules = (
-        Rule(LinkExtractor(allow=('https://www.baike.com/wiki/',)), callback='parse', follow=True),
-    )
+        Rule(LinkExtractor(allow=('http://www.baike.com/wiki/', 'https://www.baike.com/wiki/')),
+             callback='parse', follow=True),)
 
     def parse(self, response):
         items = BaikeSpiderItem()
@@ -104,4 +105,6 @@ class BaikeSpider(RedisCrawlSpider):
             items['item_tag'] = re.sub('(\r\n){2,}|\n{2,}|\r{2,}', '\n', tmpi)
         else:
             items['item_tag'] = ''
-        yield items
+        print('互动百科爬虫==》', items['title'])
+        # print('======>', items['title'], '   ', items['url'])
+        yield copy.deepcopy(items)

@@ -49,13 +49,7 @@ class SpiderPipeline(object):
                 db_logger.error(e)
         elif spider.name == baike_spider_name:
             try:
-                # data = BaikeItemData(name=item['title'], url=item['url'], summary=item['summary'],
-                #                      basic_info=item['basic_info'],
-                #                      catalog=item['catalog'], description=item['description'],
-                #                      embed_image_url=','.join(item['embed_image_url']),
-                #                      album_pic_url=item['album_pic_url'],
-                #                      reference_material=item['reference_material'], update_time=item['update_time'],
-                #                      item_tag=item['item_tag'])
+                # print('爬虫名字是：', spider.name)
                 data = BaikeItemData()
                 data.name = item['title']
                 data.url = item['url']
@@ -70,8 +64,10 @@ class SpiderPipeline(object):
                 data.item_tag = item['item_tag']
                 data.fetch_time = fetch_time
                 CommandOperate.add_one(data)
+                # print('向数据库提交数据===>', item['title'])
             except Exception as e:
                 db_logger.error(e)
+                # print('在提交的时候发生异常')
         elif spider.name == wiki_zh_spider_name:
             try:
                 data = WikiZHItemData()
@@ -139,12 +135,15 @@ class SpiderRedisPipeline(object):
                     new_url = self.base_url + url
                     common_con.lpush(baidu_task_queue, new_url)
         elif spider.name == baike_spider_name:
+            # print('这一批任务长度为{}'.format(len(item['keywords_url'])))
             for url in item['keywords_url']:
                 if self.bf2.is_exists(url):
+                    # print('要爬取的url重复了')
                     continue
                 else:
                     new_url = url
                     common_con.lpush(baike_task_queue, new_url)
+                    # print('将新的url==》{}放入任务队列'.format(new_url))
         elif spider.name == wiki_zh_spider_name:
             for url in item['keywords_url']:
                 if self.bf3.is_exists(url):
@@ -175,12 +174,16 @@ class WebCachePipeline(object):
         # WIKI网站没有可以下载的js和css
         if spider.name in (baike_spider_name, baidu_spider_name):
             for url in item['js']:
+                # if '<' in url: # 这里不知道为什么会传过来的item数据会变化
+                #     continue
                 if bf.is_exists(url):
                     continue
                 else:
+                    print("js为", url)
                     js_urls.append(url)
-
             for url in item['css']:
+                # if '<' in url:
+                #     continue
                 if bf.is_exists(url):
                     continue
                 else:
@@ -190,5 +193,4 @@ class WebCachePipeline(object):
         value = dict(title=item['title'], from2=spider.name, htm=item['html'], js=js_urls, css=css_urls,
                      pic=item['embed_image_url'])
         common_con.lpush(key, value)
-        # print('from:', spider.name)
         return item
