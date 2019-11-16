@@ -1,0 +1,51 @@
+# this config file is for some common settings,such as mysql, redis and so on.
+
+# mysql database settings
+mysql:
+  db_host: 127.0.0.1
+  db_port: 3306
+  db_user: root
+  db_pwd: mypassword
+  db_name: for_test
+  db_charset: utf8mb4
+  db_type: mysql
+  db_engine: InnoDB
+
+# redis settings
+redis:
+  redis_host: 127.0.0.1
+  redis_port: 6379
+  redis_pwd: ''
+  db: 0
+
+# logging setting
+logger:
+  log_dir: logs_dir
+  log_name: encyclopedia_data.log
+
+# spider setting
+spider:
+  # spiders task queue
+  baidu_task_queue: encyclopedia:queue:baidu
+  baike_task_queue: encyclopedia:queue:baike
+  wiki_zh_task_queue: encyclopedia:queue:zh.wiki
+  wiki_en_task_queue: encyclopedia:queue:en.wiki
+  # spiders' name
+  baidu_spider_name: baidu
+  baike_spider_name: baike
+  wiki_zh_spider_name: zh.wiki
+  wiki_en_spider_name: en.wiki
+  # bloom filter
+  bloom_key: encyclopedia:bloomfilter
+  # bloom filter block numbers
+  filter_blocks: 1
+  # proxy ip for wiki
+  http_proxies: ['http://127.0.0.1:10808', 'http://127.0.0.1:10809']
+  https_proxies: ['http://127.0.0.1:10808', ]
+  # whether iterate, default 'True' means spider will crawl all items in depth-first way.
+  # 'False' means only crawls given items.
+  iteration: True
+  # a batch size of urls reading from redis queue
+  spider_feed_size: 1
+  # whether using SET for redis task queue. if 'False' use LIST
+  use_set: False

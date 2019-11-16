@@ -5,9 +5,7 @@
 """
 from scrapy import cmdline
 
-# cmdline.execute("scrapy crawl baidu_spider".split())
-# cmdline.execute("scrapy crawl baike_spider".split())
-# cmdline.execute("scrapy crawl wiki_zh_spider".split())
-# cmdline.execute("scrapy crawl wiki_en_spider".split())
-cmdline.execute("scrapy crawlall".split())
-
+#  开始执行百度爬虫
+cmdline.execute("scrapy crawl baidu".split())
+# cmdline.execute("scrapy crawl zh.wiki".split())
+# cmdline.execute("scrapy crawl en.wiki".split())
