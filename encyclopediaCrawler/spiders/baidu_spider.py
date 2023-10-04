@@ -84,9 +84,12 @@ class BaiduSpider(RedisCrawlSpider):
             else:
                 basic_info_dict[dict_key] = dict_value
 
-        h2_title = '正文'
-        sibling = soup.find('div', attrs={'class': 'para-title level-2'})
+        #找到第一个class为para-title且class为level-2的div标签
+        sibling = soup.find('div', attrs={'class': lambda x: x and 'para-title' in x and 'level-2' in x})
+
+        #如果没有二级标题，那么就是正文
         if not sibling:
+            h2_title = '正文'
             content_h2_dict[h2_title] = ''
             img_dict[h2_title] = list()
             for para in soup.find_all('div', attrs={'class': 'para'}):
@@ -97,6 +100,8 @@ class BaiduSpider(RedisCrawlSpider):
                         img_dict[h2_title].append(img_url)
                 except AttributeError:
                     pass
+
+        #如果有二级标题，分别获取每个二级标题下的内容
         else:
             while sibling is not None:
                 if 'para-title level-2' in str(sibling):
@@ -107,9 +112,9 @@ class BaiduSpider(RedisCrawlSpider):
                 elif 'para-title level-3' in str(sibling):
                     # 3级标题名称
                     content_h2_dict[h2_title] += '<h3>' + sibling.find('h3').get_text('$$').split('$$')[-1] + '</h3>'
-                elif 'class="para"' in str(sibling):
+                elif 'class=\"para' in str(sibling):
                     # 对应的正文内容
-                    content_h2_dict[h2_title] += '<p>' + re.sub(r'\r|\n', '', sibling.get_text()) + '</p>'
+                    content_h2_dict[h2_title] += '<p>' + re.sub(r'\r|\n', '', sibling.get_text()).strip() + '</p>'
                     try:
                         img_url = sibling.find('img').get('data-src')
                         if img_url:
@@ -120,6 +125,7 @@ class BaiduSpider(RedisCrawlSpider):
                     sibling = next(sibling.next_siblings)
                 except StopIteration:
                     sibling = None
+                    
         # 参考资料
         try:
             reference_key = soup.find('dt', attrs={'class': 'reference-title'}).get_text()
